@@ -8,11 +8,11 @@ const notImplementedError = new Error(
 );
 
 export default class MockXMLHttpRequest {
-  static UNSENT = 0;
-  static OPENED = 1;
-  static HEADERS_RECEIVED = 2;
-  static LOADING = 3;
-  static DONE = 4;
+  static readonly UNSENT = 0;
+  static readonly OPENED = 1;
+  static readonly HEADERS_RECEIVED = 2;
+  static readonly LOADING = 3;
+  static readonly DONE = 4;
 
   public static handlers: any[] = [];
 
@@ -78,7 +78,7 @@ export default class MockXMLHttpRequest {
   public onprogress: Function;
   public ontimeout: Function;
 
-  private _eventListeners: any[] = [];
+  private _events: any[] = [];
   private _sendTimeout: any;
   private _requestHeaders: any;
   private _responseHeaders: any;
@@ -104,21 +104,21 @@ export default class MockXMLHttpRequest {
   }
 
   /** Trigger an event */
-  trigger(event: string, eventDetails?: any): MockXMLHttpRequest {
+  trigger(type: string, options?: any): MockXMLHttpRequest {
     if (this.onreadystatechange) {
       this.onreadystatechange();
     }
 
-    if ((this as any)["on" + event]) {
-      (this as any)["on" + event]();
+    if ((this as any)["on" + type]) {
+      (this as any)["on" + type]();
     }
 
-    for (const listener of this._eventListeners) {
-      if (listener.event === event) {
-        const details = eventDetails || {};
-        details.currentTarget = this;
-        details.type = event;
-        listener.listener.call(this, details);
+    for (const event of this._events) {
+      if (event.type === type) {
+        const obj = options || {};
+        obj.currentTarget = this;
+        obj.type = type;
+        event.listener.call(this, obj);
       }
     }
 
@@ -153,16 +153,12 @@ export default class MockXMLHttpRequest {
     this.readyState = MockXMLHttpRequest.LOADING;
     this.data = data;
 
-    this._sendTimeout = setTimeout(() => {
+    setTimeout(() => {
       const response = MockXMLHttpRequest.handle(new MockRequest(this));
+      if (response && typeof response.timeout !== "undefined") {
+        const timeout = Math.max(response.timeout(), this.timeout);
 
-      if (response && response instanceof MockResponse) {
-        let timeout = response.timeout();
-        timeout = typeof timeout === "number"
-          ? timeout
-          : this.timeout + 1;
-
-        if (timeout) {
+        if (timeout > 0) {
           // trigger a timeout event because the request timed timeout
           // - wait for the timeout time because many libs like jquery
           // and superagent use setTimeout to detect the error type
@@ -206,8 +202,9 @@ export default class MockXMLHttpRequest {
       return null;
     }
 
+    // Yes the spec states \r\n line-breaks...
     return Object.keys(this._responseHeaders)
-      .map(key => name + ": " + this._responseHeaders[key] + "\n")
+      .map(key => key + ": " + this._responseHeaders[key] + "\r\n")
       .join("");
   }
 
@@ -219,22 +216,30 @@ export default class MockXMLHttpRequest {
     return this._responseHeaders[name.toLowerCase()] || null;
   }
 
-  addEventListener(event: string, listener: Function) {
-    this._eventListeners.push({
+  addEventListener<K extends keyof XMLHttpRequestEventMap>(
+    type: K,
+    listener: (event?: XMLHttpRequestEventMap[K]) => any,
+    useCapture?: boolean,
+  ): void {
+    this._events.push({
       listener,
-      event,
+      type,
     });
   }
 
-  removeEventListener(event: string, listener: Function) {
-    let currentIndex = 0;
+  removeEventListener<K extends keyof XMLHttpRequestEventMap>(
+    type: K,
+    listener: (event?: XMLHttpRequestEventMap[K]) => any,
+  ): void {
+    let i = 0;
 
-    while (currentIndex < this._eventListeners.length) {
-      const eventListener = this._eventListeners[currentIndex];
-      if (eventListener.event === event && eventListener.listener === listener) {
-        this._eventListeners.splice(currentIndex, 1);
+    while (i < this._events.length) {
+      const item = this._events[i];
+
+      if (item.type === type && item.listener === listener) {
+        this._events.splice(i, 1);
       } else {
-        currentIndex++;
+        i++;
       }
     }
   }
