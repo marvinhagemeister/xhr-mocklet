@@ -1,4 +1,5 @@
 import { assert as t } from "chai";
+import * as sinon from "sinon";
 import * as window from "global";
 import mock from "../Builder";
 
@@ -23,9 +24,10 @@ describe("Builder", () => {
   });
 
   describe("mock()", () => {
-    it("should allow registering the handler", done => {
-      mock.setup();
+    beforeEach(() => mock.setup());
+    afterEach(() => mock.teardown());
 
+    it("should allow registering the handler", done => {
       mock.mock((req, res) => res
         .status(200)
         .body("OK"));
@@ -34,54 +36,92 @@ describe("Builder", () => {
       xhr.open("GET", "/");
       xhr.onload = () => {
         t.equal(xhr.responseText, "OK");
-        mock.teardown();
         done();
       };
       xhr.send();
     });
 
     it("should allow registering a specific URL handler", done => {
-      mock.setup();
-
       mock.mock("GET", "/a", (req, res) => {
         return res
           .status(200)
-          .body("A")
-          ;
+          .body("A");
       });
 
-      mock.mock("GET", "/b", (req, res) => {
+      mock.get("/b", (req, res) => {
         return res
           .status(200)
-          .body("B")
-          ;
+          .body("B");
       });
 
       const xhr = new XMLHttpRequest();
       xhr.open("GET", "/a");
       xhr.onload = () => {
         t.equal(xhr.responseText, "A");
-        mock.teardown();
         done();
       };
       xhr.send();
     });
 
     it("should allow registering a handler with URL regexp", done => {
-      mock.setup();
-
-      mock.mock("POST", /\/a\/\d+/, (req, res) => {
+      mock.post(/\/a\/\d+/, (req, res) => {
         return res
           .status(200)
-          .body(req.url().split("/")[2])
-          ;
+          .body(req.url().split("/")[2]);
       });
 
       const xhr = new XMLHttpRequest();
       xhr.open("POST", "/a/123");
       xhr.onload = () => {
         t.equal(xhr.responseText, "123");
-        mock.teardown();
+        done();
+      };
+      xhr.send();
+    });
+
+    it("should support POST method", done => {
+      mock.post("/foo/123", (req, res) => res.body("123"));
+
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", "/foo/123");
+      xhr.onload = () => {
+        t.equal(xhr.responseText, "123");
+        done();
+      };
+      xhr.send();
+    });
+
+    it("should support PUT method", done => {
+      mock.put("/foo/123", (req, res) => res.body("123"));
+
+      const xhr = new XMLHttpRequest();
+      xhr.open("PUT", "/foo/123");
+      xhr.onload = () => {
+        t.equal(xhr.responseText, "123");
+        done();
+      };
+      xhr.send();
+    });
+
+    it("should support PATCH method", done => {
+      mock.patch("/foo/123", (req, res) => res.body("123"));
+
+      const xhr = new XMLHttpRequest();
+      xhr.open("PATCH", "/foo/123");
+      xhr.onload = () => {
+        t.equal(xhr.responseText, "123");
+        done();
+      };
+      xhr.send();
+    });
+
+    it("should support DELETE method", done => {
+      mock.delete("/foo/123", (req, res) => res.body("123"));
+
+      const xhr = new XMLHttpRequest();
+      xhr.open("DELETE", "/foo/123");
+      xhr.onload = () => {
+        t.equal(xhr.responseText, "123");
         done();
       };
       xhr.send();

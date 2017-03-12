@@ -1,11 +1,10 @@
 import { assert as t } from "chai";
+import * as sinon from "sinon";
 import MockXMLHttpRequest from "../MockXMLHttpRequest";
 
-describe("MockXMLHttpRequest", () => {
-  beforeEach(() => {
-    MockXMLHttpRequest.reset();
-  });
+/* tslint:disable only-arrow-functions */
 
+describe("MockXMLHttpRequest", () => {
   afterEach(() => {
     MockXMLHttpRequest.reset();
   });
@@ -56,13 +55,10 @@ describe("MockXMLHttpRequest", () => {
     });
 
     it("should time out after 100ms", done => {
+      MockXMLHttpRequest.addHandler((req, res) => res.timeout(true));
+
       let start: any;
       let end: any;
-
-      MockXMLHttpRequest.addHandler((req, res) => {
-        return res.timeout(true);
-      });
-
       const xhr = new MockXMLHttpRequest();
       xhr.timeout = 100;
       xhr.open("/");
@@ -157,7 +153,7 @@ describe("MockXMLHttpRequest", () => {
       MockXMLHttpRequest.addHandler((req, res) => res);
 
       const xhr = new MockXMLHttpRequest();
-      xhr.addEventListener("load", (event: any) => {
+      xhr.addEventListener("load", function(event) {
         t.equal(event.currentTarget, xhr);
         t.equal(event.type, "load");
         t.equal(this, xhr);
@@ -171,7 +167,7 @@ describe("MockXMLHttpRequest", () => {
       MockXMLHttpRequest.addHandler((req, res) => res);
 
       const xhr = new MockXMLHttpRequest();
-      xhr.addEventListener("abort", (event: any) => {
+      xhr.addEventListener("abort", function(event) {
         t.equal(event.currentTarget, xhr);
         t.equal(this, xhr);
         done();
@@ -188,7 +184,7 @@ describe("MockXMLHttpRequest", () => {
       });
 
       const xhr = new MockXMLHttpRequest();
-      xhr.addEventListener("progress", (event: any) => {
+      xhr.addEventListener("progress", event => {
         t.equal(event.lengthComputable, true);
         t.equal(event.loaded, 50);
         t.equal(event.total, 100);
@@ -200,15 +196,20 @@ describe("MockXMLHttpRequest", () => {
 
     it("should allow unregistering event listener", done => {
       MockXMLHttpRequest.addHandler((req, res) => res);
+      const spy = sinon.spy();
 
       const xhr = new MockXMLHttpRequest();
       const cb = () => done();
 
-      xhr.addEventListener("load", cb);
-      xhr.addEventListener("load", cb);
-      xhr.removeEventListener("load", cb);
+      xhr.addEventListener("load", spy);
+      xhr.removeEventListener("load", spy);
       xhr.open("/");
       xhr.send();
+
+      setTimeout(() => {
+        t.equal(spy.callCount, 0);
+        done();
+      }, 5);
     });
   });
 });

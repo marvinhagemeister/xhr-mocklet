@@ -3,13 +3,13 @@ export default class MockResponse {
   private _status: number;
   private _headers: any;
   private _body: string;
-  private _timeout: boolean | number;
+  private _timeout: number;
 
   constructor() {
     this._status = 200;
     this._headers = {};
     this._body = "";
-    this._timeout = false;
+    this._timeout = 0;
   }
 
   /** Get the HTTP status */
@@ -64,15 +64,17 @@ export default class MockResponse {
   }
 
   /** Get the HTTP timeout */
-  timeout(): number | boolean;
+  timeout(): number;
   /** Set the HTTP timeout */
   timeout(timeout: number | boolean): MockResponse;
-  timeout(timeout?: number | boolean): number | boolean | MockResponse {
+  timeout(timeout?: number | boolean): number | MockResponse {
     if (typeof timeout === "undefined") {
       return this._timeout;
     }
 
-    this._timeout = timeout;
+    this._timeout = typeof timeout === "number"
+      ? timeout
+      : 0;
     return this;
   }
 }
