@@ -1,6 +1,8 @@
 {
   "name": "xhr-mock",
   "version": "1.7.0",
+  "typings": "index.d.ts",
+  "main": "dist/index.js",
   "description": "Utility for mocking XMLHttpRequests in the browser.",
   "keywords": [
     "mock",
@@ -19,17 +21,62 @@
     "url": "git://github.com/jameslnewell/xhr-mock.git"
   },
   "dependencies": {
-    "global": "^4.3.0",
+    "global": "^4.3.1",
     "url-parse": "^1.1.7"
   },
   "devDependencies": {
+    "@types/chai": "^3.4.35",
+    "@types/mocha": "^2.2.40",
+    "@types/node": "^7.0.8",
     "browserify": "^14.0.0",
+    "chai": "^3.5.0",
+    "husky": "^0.13.2",
+    "mocha": "^3.2.0",
     "mochify": "^2.13.0",
-    "superagent": "^3.4.1"
+    "nyc": "^10.1.2",
+    "rimraf": "^2.6.1",
+    "superagent": "^3.4.1",
+    "ts-node": "^2.1.0",
+    "tslint": "^4.5.1",
+    "typescript": "^2.2.1"
   },
   "scripts": {
-    "test": "mochify",
-    "example.build": "mkdir -p build && browserify -r superagent -r ./index.js:xhr-mock -o build/build.js"
+    "clean": "rimraf dist/",
+    "lint": "tslint 'src/**/*.ts'",
+    "watch": "tsc -w",
+    "build": "npm run clean && tsc && tsc --module es6 --outDir lib/es/ && rollup -c && NODE_ENV=production rollup -c",
+    "test": "mocha --compilers ts:ts-node/register 'src/**/__tests__/*.spec.ts'",
+    "test-watch": "npm t -- -w -R min",
+    "coverage": "nyc npm t",
+    "prepublish": "npm run lint && npm t && npm run build",
+    "precommit": "./scripts/pre-commit.sh"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "nyc": {
+    "include": [
+      "src/*.ts",
+      "src/**/*.ts"
+    ],
+    "exclude": [
+      "typings",
+      "node_modules/",
+      "**/__tests__/**",
+      "__tests__/**",
+      "**/*.d.ts"
+    ],
+    "extension": [
+      ".ts"
+    ],
+    "require": [
+      "ts-node/register"
+    ],
+    "reporter": [
+      "json",
+      "html",
+      "text",
+      "text-summary",
+      "lcovonly"
+    ],
+    "all": true
+  }
 }
