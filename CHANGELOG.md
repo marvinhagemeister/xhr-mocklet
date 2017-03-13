@@ -3,6 +3,7 @@
 ## next
 
 - Add readyStates as both static and and instance members
+- default response `status` to 200
 
 ## 1.0.0
 
