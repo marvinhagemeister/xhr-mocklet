@@ -7,12 +7,14 @@ const notImplementedError = new Error(
   "This feature hasn't been implmented yet. Please submit an Issue or Pull Request on Github.",
 );
 
-export default class MockXMLHttpRequest {
-  static readonly UNSENT = 0;
-  static readonly OPENED = 1;
-  static readonly HEADERS_RECEIVED = 2;
-  static readonly LOADING = 3;
-  static readonly DONE = 4;
+const createEvent = (options: any, target: any, type: string) => {
+  const obj = options || {};
+  obj.currentTarget = target;
+  obj.type = type;
+  return obj;
+};
+
+export default class MockXMLHttpRequest implements XMLHttpRequest {
 
   public static handlers: any[] = [];
 
@@ -44,6 +46,12 @@ export default class MockXMLHttpRequest {
     return null;
   }
 
+  readonly UNSENT = 0;
+  readonly OPENED = 1;
+  readonly HEADERS_RECEIVED = 2;
+  readonly LOADING = 3;
+  readonly DONE = 4;
+
   get handlers() {
     return MockXMLHttpRequest.handlers;
   }
@@ -63,20 +71,23 @@ export default class MockXMLHttpRequest {
   public reponse: string;
   public responseText: string;
   public responseType: string;
-  public responseXML: string;
+  public responseXML: Document;
+  public responseURL: string;
   public response: string;
+  public upload: XMLHttpRequestUpload;
   public readyState: number;
-  public onreadystatechange: undefined | Function;
+  public onreadystatechange: (this: XMLHttpRequest, ev: Event) => any;
   public timeout = 0;
+  public msCachingEnabled: () => boolean;
 
   // Events
-  public onabort: Function;
-  public onerror: Function;
-  public onload: Function;
-  public onloadend: Function;
-  public onloadstart: Function;
-  public onprogress: Function;
-  public ontimeout: Function;
+  public onabort: (this: XMLHttpRequestEventTarget, ev: Event) => any;
+  public onerror: (this: XMLHttpRequestEventTarget, ev: Event) => any;
+  public onload: (this: XMLHttpRequestEventTarget, ev: Event) => any;
+  public onloadend: (this: XMLHttpRequestEventTarget, ev: Event) => any;
+  public onloadstart: (this: XMLHttpRequestEventTarget, ev: Event) => any;
+  public onprogress: (this: XMLHttpRequestEventTarget, ev: Event) => any;
+  public ontimeout: (this: XMLHttpRequestEventTarget, ev: Event) => any;
 
   private _events: any[] = [];
   private _sendTimeout: any;
@@ -85,6 +96,10 @@ export default class MockXMLHttpRequest {
 
   constructor() {
     this.reset();
+  }
+
+  dispatchEvent(evt: Event): boolean {
+    throw notImplementedError;
   }
 
   /** Reset the response values */
@@ -100,13 +115,13 @@ export default class MockXMLHttpRequest {
     this.responseText = null;
     this.responseXML = null;
 
-    this.readyState = MockXMLHttpRequest.UNSENT;
+    this.readyState = this.UNSENT;
   }
 
   /** Trigger an event */
   trigger(type: string, options?: any): MockXMLHttpRequest {
     if (this.onreadystatechange) {
-      this.onreadystatechange();
+      this.onreadystatechange(createEvent(options, this, type));
     }
 
     if ((this as any)["on" + type]) {
@@ -115,10 +130,7 @@ export default class MockXMLHttpRequest {
 
     for (const event of this._events) {
       if (event.type === type) {
-        const obj = options || {};
-        obj.currentTarget = this;
-        obj.type = type;
-        event.listener.call(this, obj);
+        event.listener.call(this, createEvent(options, this, type));
       }
     }
 
@@ -127,7 +139,7 @@ export default class MockXMLHttpRequest {
 
   open(method: string, url?: string, async?: boolean, user?: string, password?: string): void {
     this.reset();
-    this.readyState = MockXMLHttpRequest.OPENED;
+    this.readyState = this.OPENED;
     this.data = null;
 
     if (typeof url === "undefined") {
@@ -150,7 +162,7 @@ export default class MockXMLHttpRequest {
   }
 
   send(data?: any): void {
-    this.readyState = MockXMLHttpRequest.LOADING;
+    this.readyState = this.LOADING;
     this.data = data;
 
     setTimeout(() => {
@@ -163,7 +175,7 @@ export default class MockXMLHttpRequest {
           // - wait for the timeout time because many libs like jquery
           // and superagent use setTimeout to detect the error type
           this._sendTimeout = setTimeout(() => {
-            this.readyState = MockXMLHttpRequest.DONE;
+            this.readyState = this.DONE;
             this.trigger("timeout");
           }, timeout);
         } else {
@@ -173,14 +185,14 @@ export default class MockXMLHttpRequest {
           this.responseType = "text";
           this.response = response.body();
           this.responseText = response.body(); // TODO: detect an object and return JSON, detect XML and return XML
-          this.readyState = MockXMLHttpRequest.DONE;
+          this.readyState = this.DONE;
 
           // trigger a load event because the request was received
           this.trigger("load");
         }
       } else {
         // trigger an error because the request was not handled
-        this.readyState = MockXMLHttpRequest.DONE;
+        this.readyState = this.DONE;
         this.trigger("error");
       }
     }, 0);
@@ -189,16 +201,16 @@ export default class MockXMLHttpRequest {
   abort(): void {
     clearTimeout(this._sendTimeout);
 
-    if (this.readyState > MockXMLHttpRequest.UNSENT &&
-      this.readyState < MockXMLHttpRequest.DONE
+    if (this.readyState > this.UNSENT &&
+      this.readyState < this.DONE
     ) {
-      this.readyState = MockXMLHttpRequest.UNSENT;
+      this.readyState = this.UNSENT;
       this.trigger("abort");
     }
   }
 
   getAllResponseHeaders(): null | string {
-    if (this.readyState < MockXMLHttpRequest.HEADERS_RECEIVED) {
+    if (this.readyState < this.HEADERS_RECEIVED) {
       return null;
     }
 
@@ -209,7 +221,7 @@ export default class MockXMLHttpRequest {
   }
 
   getResponseHeader(name: string): null | string {
-    if (this.readyState < MockXMLHttpRequest.HEADERS_RECEIVED) {
+    if (this.readyState < this.HEADERS_RECEIVED) {
       return null;
     }
 

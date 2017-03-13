@@ -27,7 +27,7 @@ describe("MockXMLHttpRequest", () => {
     it("should be OPENED", () => {
       const xhr = new MockXMLHttpRequest();
       xhr.open("/");
-      t.equal(xhr.readyState, MockXMLHttpRequest.OPENED);
+      t.equal(xhr.readyState, xhr.OPENED);
     });
   });
 
@@ -86,7 +86,7 @@ describe("MockXMLHttpRequest", () => {
       xhr.ontimeout = () => {
         end = Date.now();
         t.isTrue(end - start >= 100);
-        t.equal(xhr.readyState, MockXMLHttpRequest.DONE);
+        t.equal(xhr.readyState, xhr.DONE);
         done();
       };
       start = Date.now();
