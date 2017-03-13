@@ -27,6 +27,14 @@ describe("Builder", () => {
     beforeEach(() => mock.setup());
     afterEach(() => mock.teardown());
 
+    it("should make readyStates available statically", () => {
+      t.equal(XMLHttpRequest.UNSENT, 0);
+      t.equal(XMLHttpRequest.OPENED, 1);
+      t.equal(XMLHttpRequest.HEADERS_RECEIVED, 2);
+      t.equal(XMLHttpRequest.LOADING, 3);
+      t.equal(XMLHttpRequest.DONE, 4);
+    });
+
     it("should allow registering the handler", done => {
       mock.mock((req, res) => res
         .status(200)
