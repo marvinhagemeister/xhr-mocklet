@@ -113,7 +113,7 @@ export default class MockXMLHttpRequest implements XMLHttpRequest {
     this._requestHeaders = {};
     this._responseHeaders = {};
 
-    this.status = 0;
+    this.status = 200;
     this.statusText = "";
 
     this.response = null;
