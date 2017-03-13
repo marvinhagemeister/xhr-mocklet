@@ -42,23 +42,28 @@ export default class MockResponse {
   headers(): object;
   /** Set all of the HTTP headers */
   headers(headers: object): MockResponse;
-  headers(headers?: any): object | MockResponse {
+  headers(headers?: object): object | MockResponse {
     if (typeof headers === "undefined") {
       return this._headers;
     }
 
-    Object.keys(headers).forEach(key => this.header(key, headers[key]));
+    Object.keys(headers).forEach(key => this.header(key, (headers as any)[key]));
     return this;
   }
 
   /** Get the HTTP body */
   body(): string;
   /** Set the HTTP body */
-  body(body: string): MockResponse;
-  body(body?: string): string | MockResponse {
+  body(body: string | object): MockResponse;
+  body(body?: string | object): string | MockResponse {
     if (typeof body === "undefined") {
       return this._body;
     }
+
+    if (typeof body === "object") {
+      body = JSON.stringify(body);
+    }
+
     this._body = body;
     return this;
   }
