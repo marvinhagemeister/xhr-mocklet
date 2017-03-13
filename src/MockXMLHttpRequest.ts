@@ -1,5 +1,7 @@
 import MockResponse from "./MockResponse";
 import MockRequest from "./MockRequest";
+import MockProgressEvent from "./polyfill/MockProgressEvent";
+import MockEvent from "./polyfill/MockEvent";
 
 /* tslint:disable ban-types */
 
@@ -8,10 +10,24 @@ const notImplementedError = new Error(
 );
 
 const createEvent = (options: any, target: any, type: string) => {
-  const obj = options || {};
-  obj.currentTarget = target;
-  obj.type = type;
-  return obj;
+  const hasProgress = ["error", "progress", "loadstart", "loadend", "load",
+    "timeout", "abort"];
+
+  let event;
+  if (hasProgress.indexOf(type) > -1) {
+    event = new MockProgressEvent(type, {
+      lengthComputable: true,
+      loaded: options && options.loaded || 0,
+      total: options && options.total || 0,
+    });
+  } else {
+    event = new MockEvent(type);
+  }
+
+  (event as any).currentTarget = target;
+  (event as any).target = target;
+
+  return event;
 };
 
 export default class MockXMLHttpRequest implements XMLHttpRequest {
@@ -88,11 +104,11 @@ export default class MockXMLHttpRequest implements XMLHttpRequest {
 
   // Events
   public onabort: (this: XMLHttpRequestEventTarget, ev: Event) => any;
-  public onerror: (this: XMLHttpRequestEventTarget, ev: Event) => any;
+  public onerror: (this: XMLHttpRequestEventTarget, ev: ErrorEvent) => any;
   public onload: (this: XMLHttpRequestEventTarget, ev: Event) => any;
   public onloadend: (this: XMLHttpRequestEventTarget, ev: Event) => any;
   public onloadstart: (this: XMLHttpRequestEventTarget, ev: Event) => any;
-  public onprogress: (this: XMLHttpRequestEventTarget, ev: Event) => any;
+  public onprogress: (this: XMLHttpRequestEventTarget, ev: ProgressEvent) => any;
   public ontimeout: (this: XMLHttpRequestEventTarget, ev: Event) => any;
 
   private _events: any[] = [];
@@ -127,11 +143,26 @@ export default class MockXMLHttpRequest implements XMLHttpRequest {
   /** Trigger an event */
   trigger(type: string, options?: any): MockXMLHttpRequest {
     if (this.onreadystatechange) {
-      this.onreadystatechange(createEvent(options, this, type));
+      this.onreadystatechange.call(this, createEvent(options, this, "readystatechange"));
+    }
+
+    const hasEvent = this._events.find(item => item.type === "loadend");
+    if (this.readyState === MockXMLHttpRequest.DONE &&
+      (this.onloadend || hasEvent)) {
+      let listener;
+      if (this.onloadend) {
+        listener = this.onloadend;
+      } else if (typeof hasEvent !== "undefined") {
+        listener = hasEvent.listener;
+      }
+
+      if (typeof listener !== "undefined") {
+        listener.call(this, createEvent(options, this, "loadend"));
+      }
     }
 
     if ((this as any)["on" + type]) {
-      (this as any)["on" + type]();
+      (this as any)["on" + type].call(this, createEvent(options, this, type));
     }
 
     for (const event of this._events) {
@@ -173,7 +204,8 @@ export default class MockXMLHttpRequest implements XMLHttpRequest {
 
     setTimeout(() => {
       const response = MockXMLHttpRequest.handle(new MockRequest(this));
-      if (response && typeof response.timeout !== "undefined") {
+
+      if (response !== null) {
         const timeout = Math.max(response.timeout(), this.timeout);
 
         if (timeout > 0) {
@@ -194,6 +226,7 @@ export default class MockXMLHttpRequest implements XMLHttpRequest {
           this.readyState = MockXMLHttpRequest.DONE;
 
           // trigger a load event because the request was received
+          this.trigger("loadstart");
           this.trigger("load");
         }
       } else {

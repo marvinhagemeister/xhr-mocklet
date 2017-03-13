@@ -79,7 +79,7 @@ export default class MockResponse {
 
     this._timeout = typeof timeout === "number"
       ? timeout
-      : 0;
+      : 1;
     return this;
   }
 }

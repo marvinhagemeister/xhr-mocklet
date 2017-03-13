@@ -1,5 +1,6 @@
 import * as URL from "url";
 import MockXMLHttpRequest from "./MockXMLHttpRequest";
+import MockProgressEvent from "./polyfill/MockProgressEvent";
 
 /** The mocked request data */
 export default class MockRequest {
@@ -81,10 +82,10 @@ export default class MockRequest {
 
   /** Trigger progress event */
   progress(loaded: number, total?: number, lengthComputable?: boolean): void {
-    this._xhr.trigger("progress", {
+    this._xhr.trigger("progress", new MockProgressEvent("progress", {
       lengthComputable: lengthComputable || true,
       loaded,
       total,
-    });
+    }));
   }
 }
