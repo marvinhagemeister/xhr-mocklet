@@ -43,7 +43,7 @@ mock.teardown();
 
 ### Simulating an error
 
-Simply return `null` from your respnose handler:
+Simply return `null` from your response handler:
 
 ```js
 mock.post('http://localhost/foo', (req, res) => null);
@@ -96,7 +96,6 @@ xhr.onreadystatechange = () => {
 | Method | Description |
 |---|---|
 | `method(): string` | Get the request method. |
-| `url(): string` | Get the request URL. |
 | `url(): string` | Get the request URL. |
 | `query(): object` | Get the parsed query part of the request URL. |
 | `header(name: string): string` | Get a request header. |
