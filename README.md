@@ -87,9 +87,9 @@ xhr.onreadystatechange = () => {
 | `delete(url: string | regex, callback)` | Create `DELETE` mock response for a specific url. |
 | `mock(callback)` | Register mock response for every request. |
 
-
-
 ### MockXMLHttpRequest
+
+The api is practically similar to the native [XMLHttpRequest](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest).
 
 ### MockRequest
 
