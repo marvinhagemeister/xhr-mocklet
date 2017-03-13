@@ -16,7 +16,7 @@ describe("MockResponse", () => {
     const res = new MockResponse();
 
     res.timeout(true);
-    t.equal(res.timeout(), 0);
+    t.equal(res.timeout(), 1);
 
     res.timeout(100);
     t.equal(res.timeout(), 100);

@@ -1,6 +1,7 @@
 import { assert as t } from "chai";
 import * as sinon from "sinon";
 import MockXMLHttpRequest from "../MockXMLHttpRequest";
+import MockProgressEvent from "../polyfill/MockProgressEvent";
 
 /* tslint:disable only-arrow-functions */
 
@@ -185,6 +186,8 @@ describe("MockXMLHttpRequest", () => {
 
       const xhr = new MockXMLHttpRequest();
       xhr.addEventListener("progress", event => {
+        t.equal(event instanceof MockProgressEvent, true);
+        t.equal(event.type, "progress");
         t.equal(event.lengthComputable, true);
         t.equal(event.loaded, 50);
         t.equal(event.total, 100);

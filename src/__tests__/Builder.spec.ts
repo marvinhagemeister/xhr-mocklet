@@ -2,6 +2,7 @@ import { assert as t } from "chai";
 import * as sinon from "sinon";
 import * as window from "global";
 import mock from "../Builder";
+import MockProgressEvent from "../polyfill/MockProgressEvent";
 
 const noop = (res: any) => res;
 
@@ -132,6 +133,100 @@ describe("Builder", () => {
         t.equal(xhr.responseText, "123");
         done();
       };
+      xhr.send();
+    });
+
+    it("should call error callback", done => {
+      mock.get("/foo", (req, res) => null);
+
+      const xhr = new XMLHttpRequest();
+      xhr.addEventListener("error", ev => {
+        t.equal(ev instanceof MockProgressEvent, true);
+        t.equal(ev.type, "error");
+        done();
+      });
+      xhr.open("GET", "/foo");
+      xhr.send();
+    });
+
+    it("should call onreadystatechange callback", done => {
+      mock.get("/foo", (req, res) => null);
+
+      const xhr = new XMLHttpRequest();
+      xhr.onreadystatechange = ev => {
+        t.equal(ev instanceof MockProgressEvent, false);
+        t.equal(ev.type, "readystatechange");
+        done();
+      };
+      xhr.open("GET", "/foo");
+      xhr.send();
+    });
+
+    it("should call loadend callback", done => {
+      mock.get("/foo", (req, res) => null);
+
+      const xhr = new XMLHttpRequest();
+      xhr.addEventListener("loadend", ev => {
+        t.equal(ev instanceof MockProgressEvent, true);
+        t.equal(ev.type, "loadend");
+        done();
+      });
+      xhr.open("GET", "/foo");
+      xhr.send();
+    });
+
+    it("should call load callback", done => {
+      mock.get("/foo", (req, res) => res.body("foo"));
+
+      const xhr = new XMLHttpRequest();
+      xhr.addEventListener("load", ev => {
+        t.equal(ev instanceof MockProgressEvent, true);
+        t.equal(ev.type, "load");
+        done();
+      });
+      xhr.open("GET", "/foo");
+      xhr.send();
+    });
+
+    it("should call timeout callback", done => {
+      mock.get("/foo", (req, res) => res.timeout(true));
+
+      const xhr = new XMLHttpRequest();
+      xhr.addEventListener("timeout", ev => {
+        t.equal(ev instanceof MockProgressEvent, true);
+        t.equal(ev.type, "timeout");
+        done();
+      });
+      xhr.open("GET", "/foo");
+      xhr.send();
+    });
+
+    it("should call abort callback", done => {
+      mock.get("/foo", (req, res) => res.timeout(100));
+
+      const xhr = new XMLHttpRequest();
+      xhr.addEventListener("abort", ev => {
+        t.equal(ev instanceof MockProgressEvent, true);
+        t.equal(ev.type, "abort");
+        done();
+      });
+      xhr.open("GET", "/foo");
+      xhr.send();
+      xhr.abort();
+    });
+
+    it("should call loadstart callback", done => {
+      mock.get("/foo", (req, res) => res.body("hello"));
+
+      const xhr = new XMLHttpRequest();
+      xhr.addEventListener("loadstart", ev => {
+        t.equal(ev instanceof MockProgressEvent, true);
+        t.equal((ev as MockProgressEvent).loaded, 0);
+        t.equal((ev as MockProgressEvent).total, 0);
+        t.equal(ev.type, "loadstart");
+        done();
+      });
+      xhr.open("GET", "/foo");
       xhr.send();
     });
   });
