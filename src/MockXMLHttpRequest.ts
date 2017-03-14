@@ -103,13 +103,13 @@ export default class MockXMLHttpRequest implements XMLHttpRequest {
   public msCachingEnabled: () => boolean;
 
   // Events
-  public onabort: (this: XMLHttpRequestEventTarget, ev: Event) => any;
-  public onerror: (this: XMLHttpRequestEventTarget, ev: ErrorEvent) => any;
-  public onload: (this: XMLHttpRequestEventTarget, ev: Event) => any;
-  public onloadend: (this: XMLHttpRequestEventTarget, ev: Event) => any;
-  public onloadstart: (this: XMLHttpRequestEventTarget, ev: Event) => any;
+  public onabort: (this: XMLHttpRequestEventTarget, ev: ProgressEvent) => any;
+  public onerror: (this: XMLHttpRequestEventTarget, ev: Event) => any;
+  public onload: (this: XMLHttpRequestEventTarget, ev: ProgressEvent) => any;
+  public onloadend: (this: XMLHttpRequestEventTarget, ev: ProgressEvent) => any;
+  public onloadstart: (this: XMLHttpRequestEventTarget, ev: ProgressEvent) => any;
   public onprogress: (this: XMLHttpRequestEventTarget, ev: ProgressEvent) => any;
-  public ontimeout: (this: XMLHttpRequestEventTarget, ev: Event) => any;
+  public ontimeout: (this: XMLHttpRequestEventTarget, ev: ProgressEvent) => any;
 
   private _events: any[] = [];
   private _sendTimeout: any;
@@ -267,9 +267,9 @@ export default class MockXMLHttpRequest implements XMLHttpRequest {
     return this._responseHeaders[name.toLowerCase()] || null;
   }
 
-  addEventListener<K extends keyof XMLHttpRequestEventMap>(
+  addEventListener<K extends keyof XMLHttpRequestEventTargetEventMap>(
     type: K,
-    listener: (event?: XMLHttpRequestEventMap[K]) => any,
+    listener: (event?: XMLHttpRequestEventTargetEventMap[K]) => any,
     useCapture?: boolean,
   ): void {
     this._events.push({
