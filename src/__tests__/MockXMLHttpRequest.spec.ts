@@ -41,6 +41,16 @@ describe("MockXMLHttpRequest", () => {
         } catch (e) { /* noop */ }
       });
     });
+
+    it("should throw on invalid HTTP methods", () => {
+      const xhr = new MockXMLHttpRequest();
+      ["foo", "BAZ"].forEach(method => {
+        try {
+          xhr.open(method, "/");
+          t.fail();
+        } catch (e) { /* noop */ }
+      });
+    });
   });
 
   describe("send()", () => {

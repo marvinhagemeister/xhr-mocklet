@@ -5,6 +5,8 @@ import MockProgressEvent from "./polyfill/MockProgressEvent";
 import MockEvent from "./polyfill/MockEvent";
 import {
   BAD_HEADER_NAMES,
+  HTTP_METHODS,
+  HTTP_METHOD_OUTDATED,
   inProgressError,
   mainThreadError,
   notImplementedError,
@@ -244,13 +246,12 @@ export default class MockXMLHttpRequest implements XMLHttpRequest {
     password: string = null,
   ): void {
     // Throw on outdated HTTP methods
-    if (["CONNECT", "TRACE", "TRACK"].indexOf(method.toUpperCase()) > -1) {
+    if (HTTP_METHOD_OUTDATED.indexOf(method.toUpperCase()) > -1) {
       throw new Error("Security Error: HTTP method must not be \"" + method + "\"");
     }
 
     // Parse method
-    const METHODS = ["OPTIONS", "GET", "HEAD", "POST", "PUT", "PATCH", "DELETE"];
-    if (METHODS.indexOf(method.toUpperCase()) === -1) {
+    if (HTTP_METHODS.indexOf(method.toUpperCase()) === -1) {
       throw new SyntaxError("Invalid HTTP method \"" + method + "\"");
     }
 
