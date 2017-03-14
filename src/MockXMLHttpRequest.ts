@@ -8,7 +8,7 @@ import {
   inProgressError,
   mainThreadError,
   notImplementedError,
-} from "./utils";
+} from "./utils/index";
 
 /* tslint:disable ban-types */
 
@@ -286,7 +286,7 @@ export default class MockXMLHttpRequest implements XMLHttpRequest {
     }
 
     // TODO: Validate value per spec
-    if (BAD_HEADER_NAMES.some(n => n.toUpperCase() === name.toUpperCase())
+    if (BAD_HEADER_NAMES.some((n: string) => n.toUpperCase() === name.toUpperCase())
       || /(Proxy\-|Sec\-)/i.test(name)) {
       throw new Error("Forbidden header name: \"" + name + "\"");
     }
@@ -335,12 +335,12 @@ export default class MockXMLHttpRequest implements XMLHttpRequest {
       const response = MockXMLHttpRequest.handle(new MockRequest(this));
 
       const timeout = Math.max(response.timeout(), this.timeout);
-      if (this.timeout > 0) {
+      if (timeout > 0) {
         this._sendTimeout = setTimeout(() => {
           this.readyState = MockXMLHttpRequest.DONE;
           this.trigger("timeout");
           return;
-        }, this.timeout);
+        }, timeout);
       }
 
       // TODO: fire progress on .upload

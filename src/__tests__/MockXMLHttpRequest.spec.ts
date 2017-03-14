@@ -2,6 +2,7 @@ import { assert as t } from "chai";
 import * as sinon from "sinon";
 import MockXMLHttpRequest from "../MockXMLHttpRequest";
 import MockProgressEvent from "../polyfill/MockProgressEvent";
+import { HTTP_METHOD_OUTDATED, HTTP_METHODS } from "../utils";
 
 /* tslint:disable only-arrow-functions */
 
@@ -29,6 +30,16 @@ describe("MockXMLHttpRequest", () => {
       const xhr = new MockXMLHttpRequest();
       xhr.open("get", "/");
       t.equal(xhr.readyState, xhr.OPENED);
+    });
+
+    it("should throw on outdated HTTP methods", () => {
+      const xhr = new MockXMLHttpRequest();
+      HTTP_METHOD_OUTDATED.forEach(method => {
+        try {
+          xhr.open(method, "/");
+          t.fail();
+        } catch (e) { /* noop */ }
+      });
     });
   });
 

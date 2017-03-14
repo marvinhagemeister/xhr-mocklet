@@ -29,3 +29,6 @@ export const BAD_HEADER_NAMES = [
   "Upgrade",
   "Via",
 ];
+
+export const HTTP_METHOD_OUTDATED = ["CONNECT", "TRACE", "TRACK"];
+export const HTTP_METHODS = ["OPTIONS", "GET", "HEAD", "POST", "PUT", "PATCH", "DELETE"];
