@@ -1,6 +1,7 @@
 # XMLHttpRequest mocking
 
-[![Build Status](https://travis-ci.org/marvinhagemeister/xhr-mocklet.svg?branch=master)](https://travis-ci.org/marvinhagemeister/xhr-mocklet)
+[![Build Status](https://travis-ci.org/marvinhagemeister/xhr-mocklet.svg?branch=master)](https://travis-ci.org/marvinhagemeister/xhr-mocklet) [![MIT](https://img.shields.io/npm/l/inferno.svg?style=flat-square)](https://github.com/marvinhagemeister/xhr-mocklet/blob/master/LICENSE.md)
+[![NPM Version](https://img.shields.io/npm/v/xhr-mocklet.svg?style=flat-square)](https://www.npmjs.com/package/xhr-mocklet)
 
 Utility for mocking XMLHttpRequests both in the browser and nodejs. It's primary
 use case is for unit tests, allowing you to respond with mock responses, trigger
