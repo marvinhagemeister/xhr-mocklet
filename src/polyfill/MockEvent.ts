@@ -46,6 +46,6 @@ export default class MockEvent implements Event {
 
   deepPath(): EventTarget[] {
     // TODO: not implemented
-    throw new Error("not implemented");
+    return [];
   }
 }
