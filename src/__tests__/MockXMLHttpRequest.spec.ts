@@ -179,10 +179,7 @@ describe("MockXMLHttpRequest", () => {
     });
 
     it("should allow registering progress event listener", done => {
-      MockXMLHttpRequest.addHandler((req, res) => {
-        req.progress(50, 100);
-        return res;
-      });
+      MockXMLHttpRequest.addHandler((req, res) => res.progress(50, 100));
 
       const xhr = new MockXMLHttpRequest();
       xhr.addEventListener("progress", event => {

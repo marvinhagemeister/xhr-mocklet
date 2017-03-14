@@ -1,5 +1,9 @@
 /** The mocked response data */
 export default class MockResponse {
+  public loaded: number = 0;
+  public total: number = 0;
+  public lengthComputable: boolean = true;
+
   private _status: number;
   private _headers: any;
   private _body: string;
@@ -80,6 +84,19 @@ export default class MockResponse {
     this._timeout = typeof timeout === "number"
       ? timeout
       : 1;
+    return this;
+  }
+
+  /** Trigger progress event */
+  progress(loaded: number, total?: number, lengthComputable: boolean = true): MockResponse {
+    this.loaded = loaded;
+
+    if (typeof total !== "undefined") {
+      this.total = total;
+    }
+
+    this.lengthComputable = lengthComputable;
+
     return this;
   }
 }

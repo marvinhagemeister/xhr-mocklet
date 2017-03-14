@@ -227,6 +227,11 @@ export default class MockXMLHttpRequest implements XMLHttpRequest {
 
           // trigger a load event because the request was received
           this.trigger("loadstart");
+          this.trigger("progress", {
+            lengthComputable: response.lengthComputable,
+            loaded: response.loaded,
+            total: response.total,
+          });
           this.trigger("load");
         }
       } else {

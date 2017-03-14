@@ -229,5 +229,20 @@ describe("Builder", () => {
       xhr.open("GET", "/foo");
       xhr.send();
     });
+
+    it("should call progress callback", done => {
+      mock.get("/foo", (req, res) => res.progress(10, 20));
+
+      const xhr = new XMLHttpRequest();
+      xhr.addEventListener("progress", ev => {
+        t.equal(ev instanceof MockProgressEvent, true);
+        t.equal((ev as MockProgressEvent).loaded, 10);
+        t.equal((ev as MockProgressEvent).total, 20);
+        t.equal(ev.type, "progress");
+        done();
+      });
+      xhr.open("GET", "/foo");
+      xhr.send();
+    });
   });
 });

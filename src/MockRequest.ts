@@ -79,13 +79,4 @@ export default class MockRequest {
     this._body = body;
     return this;
   }
-
-  /** Trigger progress event */
-  progress(loaded: number, total?: number, lengthComputable?: boolean): void {
-    this._xhr.trigger("progress", new MockProgressEvent("progress", {
-      lengthComputable: lengthComputable || true,
-      loaded,
-      total,
-    }));
-  }
 }

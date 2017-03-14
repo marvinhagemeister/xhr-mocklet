@@ -1,5 +1,9 @@
 # Changelog
 
+## next
+
+- Fix progress event not called sometimes
+
 ## 1.1.0
 
 - Add readyStates as both static and and instance members
