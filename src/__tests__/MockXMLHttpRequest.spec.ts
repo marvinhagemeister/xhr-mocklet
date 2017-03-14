@@ -18,7 +18,7 @@ describe("MockXMLHttpRequest", () => {
       });
 
       const xhr = new MockXMLHttpRequest();
-      xhr.open("/");
+      xhr.open("get", "/");
       xhr.setRequestHeader("Content-Type", "application/json");
       xhr.send();
     });
@@ -27,7 +27,7 @@ describe("MockXMLHttpRequest", () => {
   describe("open()", () => {
     it("should be OPENED", () => {
       const xhr = new MockXMLHttpRequest();
-      xhr.open("/");
+      xhr.open("get", "/");
       t.equal(xhr.readyState, xhr.OPENED);
     });
   });
@@ -40,7 +40,7 @@ describe("MockXMLHttpRequest", () => {
       });
 
       const xhr = new MockXMLHttpRequest();
-      xhr.open("/");
+      xhr.open("get", "/");
       xhr.send("Hello World!");
     });
 
@@ -51,7 +51,7 @@ describe("MockXMLHttpRequest", () => {
       });
 
       const xhr = new MockXMLHttpRequest();
-      xhr.open("/");
+      xhr.open("get", "/");
       xhr.send();
     });
 
@@ -62,7 +62,7 @@ describe("MockXMLHttpRequest", () => {
       let end: any;
       const xhr = new MockXMLHttpRequest();
       xhr.timeout = 100;
-      xhr.open("/");
+      xhr.open("get", "/");
       xhr.ontimeout = () => {
         end = Date.now();
         t.isTrue(end - start >= 100);
@@ -80,7 +80,7 @@ describe("MockXMLHttpRequest", () => {
 
       const xhr = new MockXMLHttpRequest();
       xhr.timeout = 10;
-      xhr.open("/");
+      xhr.open("get", "/");
 
       let start: any;
       let end: any;
@@ -101,7 +101,7 @@ describe("MockXMLHttpRequest", () => {
       MockXMLHttpRequest.addHandler((req, res) => res.timeout(10));
 
       const xhr = new MockXMLHttpRequest();
-      xhr.open("/");
+      xhr.open("get", "/");
       xhr.ontimeout = () => timedout = true;
       xhr.onabort = () => aborted = true;
       xhr.send();
@@ -122,7 +122,7 @@ describe("MockXMLHttpRequest", () => {
       });
 
       const xhr = new MockXMLHttpRequest();
-      xhr.open("/");
+      xhr.open("get", "/");
       xhr.onload = () => {
         t.equal(xhr.getResponseHeader("Content-Type"), "application/json");
         done();
@@ -140,7 +140,7 @@ describe("MockXMLHttpRequest", () => {
       });
 
       const xhr = new MockXMLHttpRequest();
-      xhr.open("/");
+      xhr.open("get", "/");
       xhr.onload = () => {
         t.equal(xhr.getAllResponseHeaders(), "content-type: application/json\r\nx-powered-by: SecretSauce\r\n");
         done();
@@ -160,7 +160,7 @@ describe("MockXMLHttpRequest", () => {
         t.equal(this, xhr);
         done();
       });
-      xhr.open("/");
+      xhr.open("get", "/");
       xhr.send();
     });
 
@@ -173,7 +173,7 @@ describe("MockXMLHttpRequest", () => {
         t.equal(this, xhr);
         done();
       });
-      xhr.open("/");
+      xhr.open("get", "/");
       xhr.send();
       xhr.abort();
     });
@@ -193,7 +193,7 @@ describe("MockXMLHttpRequest", () => {
         t.equal(event.total, 100);
         done();
       });
-      xhr.open("/");
+      xhr.open("get", "/");
       xhr.send();
     });
 
@@ -206,7 +206,7 @@ describe("MockXMLHttpRequest", () => {
 
       xhr.addEventListener("load", spy);
       xhr.removeEventListener("load", spy);
-      xhr.open("/");
+      xhr.open("get", "/");
       xhr.send();
 
       setTimeout(() => {

@@ -1,13 +1,21 @@
+import * as URL from "url";
 import MockResponse from "./MockResponse";
 import MockRequest from "./MockRequest";
 import MockProgressEvent from "./polyfill/MockProgressEvent";
 import MockEvent from "./polyfill/MockEvent";
+import {
+  BAD_HEADER_NAMES,
+  inProgressError,
+  mainThreadError,
+  notImplementedError,
+} from "./utils";
 
 /* tslint:disable ban-types */
 
-const notImplementedError = new Error(
-  "This feature hasn't been implmented yet. Please submit an Issue or Pull Request on Github.",
-);
+// The Spec is really well written and can be viewed at
+// https://xhr.spec.whatwg.org/ . I just wish that it would
+// not rely so much on internal state. It's a mess to
+// write tests for...
 
 const createEvent = (options: any, target: any, type: string) => {
   const hasProgress = ["error", "progress", "loadstart", "loadend", "load",
@@ -46,7 +54,7 @@ export default class MockXMLHttpRequest implements XMLHttpRequest {
 
   /** Remove a request handler */
   static removeHandler(fn: (req: MockRequest, res: MockRequest) => any): MockXMLHttpRequest {
-    throw notImplementedError;
+    throw new Error(notImplementedError);
   }
 
   /** Remove all request handlers */
@@ -78,10 +86,6 @@ export default class MockXMLHttpRequest implements XMLHttpRequest {
   public readonly LOADING = 3;
   public readonly DONE = 4;
 
-  // some libraries (like Mixpanel) use the presence of this field to check
-  // if XHR is properly supported. See
-  // https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/withCredentials
-  public withCredentials = false;
   public status: number;
   public statusText: string;
   public method: string;
@@ -91,16 +95,66 @@ export default class MockXMLHttpRequest implements XMLHttpRequest {
   public data: string;
   public async: boolean;
   public reponse: string;
-  public responseText: string;
-  public responseType: string;
+
+  // Spec: https://xhr.spec.whatwg.org/#the-responsetext-attribute
+  get responseText() {
+    if (["", "text"].indexOf(this._responseType) === -1) {
+      throw new Error("InvalidStateError: Cannot get responseText for none text response");
+    } else if (this.readyState < MockXMLHttpRequest.LOADING) {
+      return "";
+    }
+
+    return this._responseText;
+  }
+
+  // Spec: https://xhr.spec.whatwg.org/#the-responsetype-attribute
+  get responseType() {
+    return this._responseType;
+  }
+
+  set responseType(value: "" | "arraybuffer" | "blob" | "document" | "json" | "text") {
+    if (this.readyState >= MockXMLHttpRequest.LOADING) {
+      throw new Error(inProgressError);
+    }
+
+    this._responseType = value;
+  }
+
   public responseXML: Document;
   public responseURL: string;
   public response: string;
+  // FIXME: NOT IMPLEMENTED
   public upload: XMLHttpRequestUpload;
-  public readyState: number;
+  public readyState: number = MockXMLHttpRequest.UNSENT;
   public onreadystatechange: (this: XMLHttpRequest, ev: Event) => any;
-  public timeout = 0;
   public msCachingEnabled: () => boolean;
+
+  get timeout() {
+    return this._timeout;
+  }
+
+  set timeout(ms: number) {
+    if (!this.async) {
+      throw new Error(mainThreadError);
+    }
+
+    this._timeout = ms;
+  }
+
+  // some libraries (like Mixpanel) use the presence of this field to check
+  // if XHR is properly supported. See
+  // https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/withCredentials
+  get withCredentials() {
+    return this._withCredentials;
+  }
+
+  set withCredentials(include: boolean) {
+    if (this.readyState > MockXMLHttpRequest.UNSENT
+      || this.readyState !== MockXMLHttpRequest.OPENED
+      || this._isSent) {
+      throw new Error(inProgressError);
+    }
+  }
 
   // Events
   public onabort: (this: XMLHttpRequestEventTarget, ev: ProgressEvent) => any;
@@ -111,17 +165,24 @@ export default class MockXMLHttpRequest implements XMLHttpRequest {
   public onprogress: (this: XMLHttpRequestEventTarget, ev: ProgressEvent) => any;
   public ontimeout: (this: XMLHttpRequestEventTarget, ev: ProgressEvent) => any;
 
+  private _responseText: string;
+  private _responseType: "" | "arraybuffer" | "blob" | "document" | "json" | "text" = "";
+  private _timeout: number = 0;
+  private _withCredentials: boolean = false;
+
   private _events: any[] = [];
   private _sendTimeout: any;
   private _requestHeaders: any;
   private _responseHeaders: any;
+
+  private _isSent: boolean = false;
 
   constructor() {
     this.reset();
   }
 
   dispatchEvent(evt: Event): boolean {
-    throw notImplementedError;
+    throw new Error(notImplementedError);
   }
 
   /** Reset the response values */
@@ -133,8 +194,8 @@ export default class MockXMLHttpRequest implements XMLHttpRequest {
     this.statusText = "";
 
     this.response = null;
-    this.responseType = null;
-    this.responseText = null;
+    this._responseType = null;
+    this._responseText = null;
     this.responseXML = null;
 
     this.readyState = MockXMLHttpRequest.UNSENT;
@@ -174,61 +235,128 @@ export default class MockXMLHttpRequest implements XMLHttpRequest {
     return this;
   }
 
-  open(method: string, url?: string, async?: boolean, user?: string, password?: string): void {
-    this.reset();
-    this.readyState = MockXMLHttpRequest.OPENED;
-    this.data = null;
+  // Spec: https://xhr.spec.whatwg.org/#the-open%28%29-method
+  open(
+    method: string,
+    url: string,
+    async: boolean = true,
+    user: string = null,
+    password: string = null,
+  ): void {
+    // Throw on outdated HTTP methods
+    if (["CONNECT", "TRACE", "TRACK"].indexOf(method.toUpperCase()) > -1) {
+      throw new Error("Security Error: HTTP method must not be \"" + method + "\"");
+    }
 
-    if (typeof url === "undefined") {
-      this.url = method;
+    // Parse method
+    const METHODS = ["OPTIONS", "GET", "HEAD", "POST", "PUT", "PATCH", "DELETE"];
+    if (METHODS.indexOf(method.toUpperCase()) === -1) {
+      throw new SyntaxError("Invalid HTTP method \"" + method + "\"");
+    }
+
+    // Parse url
+    try {
+      URL.parse(url);
+    } catch (e) {
+      throw new SyntaxError("Invalid HTTP url \"" + url + "\"");
+    }
+
+    // Throw if async = false && timeout != 0 && responseType != ''.
+    if (!async && this.timeout > 0 && this.responseType !== "") {
+      throw new Error(mainThreadError);
+    }
+
+    this.reset();
+    this.url = url;
+    this.async = async;
+    this.user = user;
+    this.password = password;
+
+    this._isSent = false;
+    this.data = null;
+    this.method = method.toUpperCase().trim();
+    this.readyState = MockXMLHttpRequest.OPENED;
+    this.trigger("readystatechange");
+  }
+
+  // Spec: https://xhr.spec.whatwg.org/#the-setrequestheader%28%29-method
+  setRequestHeader(name: string, value: string) {
+    if (this.readyState !== MockXMLHttpRequest.OPENED && this._isSent) {
+      throw new Error(inProgressError);
+    }
+
+    // TODO: Validate value per spec
+    if (BAD_HEADER_NAMES.some(n => n.toUpperCase() === name.toUpperCase())
+      || /(Proxy\-|Sec\-)/i.test(name)) {
+      throw new Error("Forbidden header name: \"" + name + "\"");
+    }
+
+    // Header values are appended to existing ones
+    if (typeof this._requestHeaders[name] === "undefined") {
+      this._requestHeaders[name] = value;
     } else {
-      this.method = method;
-      this.url = url;
-      this.async = async;
-      this.user = user;
-      this.password = password;
+      this._requestHeaders[name] += ", " + value;
     }
   }
 
-  setRequestHeader(name: string, value: string) {
-    this._requestHeaders[name] = value;
-  }
-
   overrideMimeType(mime: string) {
-    throw notImplementedError;
+    throw new Error(notImplementedError);
   }
 
-  send(data?: any): void {
+  // Spec: https://xhr.spec.whatwg.org/#the-send%28%29-method
+  send(body?: any): void {
+    if (this.readyState !== MockXMLHttpRequest.OPENED || this._isSent) {
+      throw new Error(inProgressError);
+    }
+
+    if (["GET", "HEAD"].indexOf(this.method) > -1) {
+      body = null;
+    }
+
+    if (body !== null) {
+      // TODO: Set mimeType accordingly
+    }
+
+    // TODO: Trigger events on .upload if present
+    // TODO: unset .upload complete flag
+    // TODO: if body is null set .upload complete
+
     this.readyState = MockXMLHttpRequest.LOADING;
-    this.data = data;
+    this.data = body;
 
     setTimeout(() => {
+      this.trigger("loadstart", {
+        loaded: 0,
+        total: 0,
+      });
+
+      // TODO: Fire loadstart on upload
+
       const response = MockXMLHttpRequest.handle(new MockRequest(this));
 
-      if (response !== null) {
-        const timeout = Math.max(response.timeout(), this.timeout);
-
-        if (timeout > 0) {
-          // trigger a timeout event because the request timed timeout
-          // - wait for the timeout time because many libs like jquery
-          // and superagent use setTimeout to detect the error type
-          this._sendTimeout = setTimeout(() => {
-            this.readyState = MockXMLHttpRequest.DONE;
-            this.trigger("timeout");
-          }, timeout);
-        } else {
-          // map the response to the XHR object
-          this.status = response.status();
-          this._responseHeaders = response.headers();
-          this.responseType = "text";
-          this.response = response.body();
-          this.responseText = response.body(); // TODO: detect an object and return JSON, detect XML and return XML
+      const timeout = Math.max(response.timeout(), this.timeout);
+      if (this.timeout > 0) {
+        this._sendTimeout = setTimeout(() => {
           this.readyState = MockXMLHttpRequest.DONE;
+          this.trigger("timeout");
+          return;
+        }, this.timeout);
+      }
 
-          // trigger a load event because the request was received
-          this.trigger("loadstart");
-          this.trigger("load");
-        }
+      // TODO: fire progress on .upload
+
+      if (response !== null) {
+        // map the response to the XHR object
+        this.status = response.status();
+        this._responseHeaders = response.headers();
+        this._responseType = "text";
+        this.response = response.body();
+        this._responseText = response.body(); // TODO: detect an object and return JSON, detect XML and return XML
+        this.readyState = MockXMLHttpRequest.DONE;
+
+        // trigger a load event because the request was received
+        this.trigger("loadstart");
+        this.trigger("load");
       } else {
         // trigger an error because the request was not handled
         this.readyState = MockXMLHttpRequest.DONE;
@@ -240,12 +368,19 @@ export default class MockXMLHttpRequest implements XMLHttpRequest {
   abort(): void {
     clearTimeout(this._sendTimeout);
 
+    this.readyState = MockXMLHttpRequest.DONE;
+    this._isSent = false;
+    this.trigger("onreadystatechange");
+    // TODO: .upload
+
     if (this.readyState > MockXMLHttpRequest.UNSENT &&
       this.readyState < MockXMLHttpRequest.DONE
     ) {
-      this.readyState = MockXMLHttpRequest.UNSENT;
       this.trigger("abort");
     }
+
+    this.readyState = MockXMLHttpRequest.UNSENT;
+    this.trigger("loadend", { loaded: 0, total: 0 });
   }
 
   getAllResponseHeaders(): null | string {
