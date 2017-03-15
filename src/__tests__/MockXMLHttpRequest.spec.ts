@@ -11,6 +11,74 @@ describe("MockXMLHttpRequest", () => {
     MockXMLHttpRequest.reset();
   });
 
+  describe("responseText", () => {
+    it("should throw if responseText is not \"\" or \"text\"", () => {
+      const xhr = new MockXMLHttpRequest();
+      t.throws(() => xhr.responseText);
+    });
+
+    it("should return \"\" if readyState < LOADING", () => {
+      const xhr = new MockXMLHttpRequest();
+      (xhr as any)._responseType = "text";
+      (xhr as any).readyState = MockXMLHttpRequest.OPENED;
+      t.equal(xhr.responseText, "");
+    });
+
+    it("should return responseText", () => {
+      const xhr = new MockXMLHttpRequest();
+      (xhr as any)._responseType = "text";
+      (xhr as any)._responseText = "foo";
+      (xhr as any).readyState = MockXMLHttpRequest.DONE;
+      t.equal(xhr.responseText, "foo");
+    });
+  });
+
+  describe("responseType", () => {
+    it("should throw on set if Request is done", () => {
+      const xhr = new MockXMLHttpRequest();
+      (xhr as any).readyState = MockXMLHttpRequest.LOADING;
+      t.throws(() => xhr.responseType = "text");
+    });
+
+    it("should get/set responseType", () => {
+      const xhr = new MockXMLHttpRequest();
+      (xhr as any)._responseType = "text";
+      (xhr as any).readyState = MockXMLHttpRequest.OPENED;
+      xhr.responseType = "text";
+      t.equal(xhr.responseType, "text");
+    });
+  });
+
+  describe("timeout", () => {
+    it("should throw on set if not async", () => {
+      const xhr = new MockXMLHttpRequest();
+      xhr.async = false;
+      t.throws(() => xhr.timeout = 20);
+    });
+
+    it("should get/set timeout", () => {
+      const xhr = new MockXMLHttpRequest();
+      xhr.timeout = 20;
+      t.equal(xhr.timeout, 20);
+    });
+  });
+
+  describe("withCredentials", () => {
+    it("should throw on set if request is already in progress", () => {
+      const xhr = new MockXMLHttpRequest();
+      (xhr as any).readyState = MockXMLHttpRequest.DONE;
+      t.throws(() => xhr.withCredentials = false);
+
+      (xhr as any).readyState = MockXMLHttpRequest.UNSENT;
+    });
+
+    it("should get/set withCredentials", () => {
+      const xhr = new MockXMLHttpRequest();
+      xhr.withCredentials = true;
+      t.equal(xhr.withCredentials, true);
+    });
+  });
+
   describe("setRequestHeader()", () => {
     it("should set a header", done => {
       MockXMLHttpRequest.addHandler((req, res) => {
@@ -35,20 +103,14 @@ describe("MockXMLHttpRequest", () => {
     it("should throw on outdated HTTP methods", () => {
       const xhr = new MockXMLHttpRequest();
       HTTP_METHOD_OUTDATED.forEach(method => {
-        try {
-          xhr.open(method, "/");
-          t.fail();
-        } catch (e) { /* noop */ }
+        t.throws(() => xhr.open(method, "/"));
       });
     });
 
     it("should throw on invalid HTTP methods", () => {
       const xhr = new MockXMLHttpRequest();
       ["foo", "BAZ"].forEach(method => {
-        try {
-          xhr.open(method, "/");
-          t.fail();
-        } catch (e) { /* noop */ }
+        t.throws(() => xhr.open(method, "/"));
       });
     });
   });
