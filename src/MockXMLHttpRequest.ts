@@ -61,7 +61,7 @@ export default class MockXMLHttpRequest implements XMLHttpRequest {
 
   /** Remove all request handlers */
   static reset(): void {
-    this.handlers = [];
+    MockXMLHttpRequest.handlers = [];
   }
 
   /** Handle a request */
@@ -74,7 +74,7 @@ export default class MockXMLHttpRequest implements XMLHttpRequest {
       }
     }
 
-    return null;
+    return new MockResponse();
   }
 
   get handlers() {
@@ -95,7 +95,7 @@ export default class MockXMLHttpRequest implements XMLHttpRequest {
   public user: string;
   public password: string;
   public data: string;
-  public async: boolean;
+  public async: boolean = true;
   public reponse: string;
 
   // Spec: https://xhr.spec.whatwg.org/#the-responsetext-attribute
@@ -150,12 +150,13 @@ export default class MockXMLHttpRequest implements XMLHttpRequest {
     return this._withCredentials;
   }
 
+  // Spec https://xhr.spec.whatwg.org/#dom-xmlhttprequest-withcredentials
   set withCredentials(include: boolean) {
-    if (this.readyState > MockXMLHttpRequest.UNSENT
-      || this.readyState !== MockXMLHttpRequest.OPENED
-      || this._isSent) {
+    if (this.readyState > MockXMLHttpRequest.OPENED || this._isSent) {
       throw new Error(inProgressError);
     }
+
+    this._withCredentials = include;
   }
 
   // Events
@@ -224,7 +225,7 @@ export default class MockXMLHttpRequest implements XMLHttpRequest {
       }
     }
 
-    if ((this as any)["on" + type]) {
+    if (typeof (this as any)["on" + type] === "function") {
       (this as any)["on" + type].call(this, createEvent(options, this, type));
     }
 
