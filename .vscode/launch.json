@@ -8,14 +8,11 @@
       "type": "node",
       "request": "launch",
       "protocol": "inspector",
-      "name": "Mocha Tests",
-      "program": "${workspaceRoot}/node_modules/mocha/bin/_mocha",
+      "name": "Tape Tests",
+      "program": "${workspaceRoot}/node_modules/.bin/tape",
       "args": [
-        "--timeout",
-        "999999",
-        "--colors",
-        "--compilers",
-        "ts:ts-node/register",
+        "-r",
+        "ts-node/register",
         "${workspaceRoot}/src/**/__tests__/*.spec.ts"
       ],
       "internalConsoleOptions": "openOnSessionStart"

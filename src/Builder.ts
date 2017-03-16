@@ -1,24 +1,30 @@
 import MockXMLHttpRequest from "./MockXMLHttpRequest";
 import MockRequest from "./MockRequest";
 import MockResponse from "./MockResponse";
-import * as window from "global";
-
-const real = (window as any).XMLHttpRequest;
 
 export type MockCallback = (req?: MockRequest, res?: MockResponse) => MockResponse;
+
+export interface EnvTarget extends Object {
+  XMLHttpRequest?: any;
+}
 
 export class Builder {
   XMLHttpRequest = new MockXMLHttpRequest();
 
+  private _real: any;
+  private _target: any;
+
   /** Replace the native XHR with the mocked XHR */
-  setup(): Builder {
-    (window as any).XMLHttpRequest = MockXMLHttpRequest;
+  setup(target: EnvTarget): Builder {
+    this._real = target.XMLHttpRequest;
+    target.XMLHttpRequest = MockXMLHttpRequest;
+    this._target = target;
     return this.reset();
   }
 
   /** Replace the mocked XHR with the native XHR and remove any handlers */
   teardown() {
-    (window as any).XMLHttpRequest = real;
+    this._target.XMLHttpRequest = this._real;
     return this.reset();
   }
 

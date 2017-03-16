@@ -1,1 +1,5 @@
-/// <reference path="./module/global.d.ts" />
+declare namespace NodeJS {
+  interface Global {
+    XMLHttpRequest: any;
+  }
+}
