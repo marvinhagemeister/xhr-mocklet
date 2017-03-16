@@ -3,6 +3,7 @@ import MockResponse from "./MockResponse";
 import MockRequest from "./MockRequest";
 import MockProgressEvent from "./polyfill/MockProgressEvent";
 import MockEvent from "./polyfill/MockEvent";
+import Registry from "./Registry";
 import {
   BAD_HEADER_NAMES,
   HTTP_METHODS,
@@ -46,40 +47,6 @@ export default class MockXMLHttpRequest implements XMLHttpRequest {
   public static readonly HEADERS_RECEIVED = 2;
   public static readonly LOADING = 3;
   public static readonly DONE = 4;
-
-  public static handlers: any[] = [];
-
-  /** Add a request handler */
-  static addHandler(fn: (req: MockRequest, res: MockResponse) => any): void {
-    MockXMLHttpRequest.handlers.push(fn);
-  };
-
-  /** Remove a request handler */
-  static removeHandler(fn: (req: MockRequest, res: MockRequest) => any): MockXMLHttpRequest {
-    throw new Error(notImplementedError);
-  }
-
-  /** Remove all request handlers */
-  static reset(): void {
-    MockXMLHttpRequest.handlers = [];
-  }
-
-  /** Handle a request */
-  static handle(req: MockRequest): MockResponse | null {
-    for (const handler of MockXMLHttpRequest.handlers) {
-      // get the generator to create a response to the request
-      const response = handler(req, new MockResponse());
-      if (response) {
-        return response;
-      }
-    }
-
-    return new MockResponse();
-  }
-
-  get handlers() {
-    return MockXMLHttpRequest.handlers;
-  }
 
   // Somehow they are both defined on the instance and static method
   public readonly UNSENT = 0;
@@ -159,6 +126,8 @@ export default class MockXMLHttpRequest implements XMLHttpRequest {
     this._withCredentials = include;
   }
 
+  public registry: Registry;
+
   // Events
   public onabort: (this: XMLHttpRequestEventTarget, ev: ProgressEvent) => any;
   public onerror: (this: XMLHttpRequestEventTarget, ev: Event) => any;
@@ -180,7 +149,8 @@ export default class MockXMLHttpRequest implements XMLHttpRequest {
 
   private _isSent: boolean = false;
 
-  constructor() {
+  constructor(registry: Registry = new Registry()) {
+    this.registry = registry;
     this.reset();
   }
 
@@ -334,9 +304,9 @@ export default class MockXMLHttpRequest implements XMLHttpRequest {
 
       // TODO: Fire loadstart on upload
 
-      const response = MockXMLHttpRequest.handle(new MockRequest(this));
+      const response = this.registry.handle(this);
 
-      const timeout = Math.max(response.timeout(), this.timeout);
+      const timeout = Math.max(response.timeout, this.timeout);
       if (timeout > 0) {
         this._sendTimeout = setTimeout(() => {
           this.readyState = MockXMLHttpRequest.DONE;
@@ -349,8 +319,8 @@ export default class MockXMLHttpRequest implements XMLHttpRequest {
 
       if (response !== null) {
         // map the response to the XHR object
-        this.status = response.status();
-        this._responseHeaders = response.headers();
+        this.status = response.status;
+        this._responseHeaders = response.headers;
         this._responseType = "text";
         this.response = response.body();
         this._responseText = response.body(); // TODO: detect an object and return JSON, detect XML and return XML

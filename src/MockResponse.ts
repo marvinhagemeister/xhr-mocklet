@@ -1,3 +1,14 @@
+import MockProgressEvent from "./polyfill/MockProgressEvent";
+
+export interface IMockResponseData {
+  body: any;
+  headers: {
+    [name: string]: string;
+  };
+  status: number;
+  timeout: number;
+}
+
 /** The mocked response data */
 export default class MockResponse {
   private _status: number;
@@ -81,5 +92,23 @@ export default class MockResponse {
       ? timeout
       : 1;
     return this;
+  }
+
+  /** Trigger progress event */
+  progress(loaded: number, total?: number, lengthComputable?: boolean): void {
+    this._xhr.trigger("progress", new MockProgressEvent("progress", {
+      lengthComputable: lengthComputable || true,
+      loaded,
+      total,
+    }));
+  }
+
+  build(): Partial<IMockResponseData> {
+    return {
+      body: this._body,
+      headers: this._headers,
+      status: this._status,
+      timeout: this._timeout,
+    };
   }
 }

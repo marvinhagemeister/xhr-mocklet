@@ -29,13 +29,13 @@ test("should remove any handlers", t => {
   mock.get("http://www.google.com/", noop);
 
   mock.setup(window);
-  t.equal(mock.XMLHttpRequest.handlers.length, 0);
+  t.equal(mock.XMLHttpRequest.registry.handlers.length, 0);
 
   mock.get("http://www.google.com/", noop);
-  t.equal(mock.XMLHttpRequest.handlers.length, 1);
+  t.equal(mock.XMLHttpRequest.registry.handlers.length, 1);
 
   mock.teardown();
-  t.equal(mock.XMLHttpRequest.handlers.length, 0);
+  t.equal(mock.XMLHttpRequest.registry.handlers.length, 0);
   t.end();
 });
 
@@ -76,7 +76,7 @@ test("should allow registering a specific URL handler", m(t => {
       .body("B");
   });
 
-  t.equal(mock.XMLHttpRequest.handlers.length, 2);
+  t.equal(mock.XMLHttpRequest.registry.handlers.length, 2);
 
   const xhr = new XMLHttpRequest();
   xhr.open("GET", "/a");
