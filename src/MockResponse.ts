@@ -15,6 +15,7 @@ export default class MockResponse {
   private _headers: any;
   private _body: string;
   private _timeout: number;
+  private _progress: number[];
 
   constructor() {
     this._status = 200;
@@ -95,15 +96,16 @@ export default class MockResponse {
   }
 
   /** Trigger progress event */
-  progress(loaded: number, total?: number, lengthComputable?: boolean): void {
-    this._xhr.trigger("progress", new MockProgressEvent("progress", {
-      lengthComputable: lengthComputable || true,
-      loaded,
-      total,
-    }));
+  progress(loaded: number, total?: number, lengthComputable: boolean = true): void {
+    // this._progress()
+    // this._xhr.trigger("progress", new MockProgressEvent("progress", {
+    //   lengthComputable: lengthComputable || true,
+    //   loaded,
+    //   total,
+    // }));
   }
 
-  build(): Partial<IMockResponseData> {
+  build(): IMockResponseData {
     return {
       body: this._body,
       headers: this._headers,

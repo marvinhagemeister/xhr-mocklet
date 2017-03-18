@@ -1,5 +1,5 @@
 import MockXMLHttpRequest from "./MockXMLHttpRequest";
-import MockRequest from "./MockRequest";
+import { RequestData } from "./MockRequest";
 import MockResponse from "./MockResponse";
 import { RequestHandler } from "./Registry";
 import { createHandler } from "./Matcher";
@@ -39,12 +39,12 @@ export class Builder {
   mock(method: string, url?: string | RegExp, fn?: RequestHandler | string | number | object): Builder;
   mock(method: string | RequestHandler, url?: string | RegExp, fn?: RequestHandler): Builder {
     if (typeof fn !== "function") {
-      fn = (req: MockRequest, res: MockResponse) => res.body(fn);
+      fn = (req: RequestData, res: MockResponse) => res.body(fn);
     }
 
     const handler = typeof method !== "function"
       ? createHandler(method, url, fn)
-      : method;
+      : (req: RequestData, res: MockResponse) => method(req, res).build();
 
     this.XMLHttpRequest.registry.add(handler);
 

@@ -1,6 +1,5 @@
 import * as URL from "url";
 import MockResponse from "./MockResponse";
-import MockRequest from "./MockRequest";
 import MockProgressEvent from "./polyfill/MockProgressEvent";
 import MockEvent from "./polyfill/MockEvent";
 import Registry from "./Registry";
