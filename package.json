@@ -25,12 +25,10 @@
     "lint": "tslint 'src/**/*.ts'",
     "watch": "tsc -w",
     "build": "npm run clean && tsc && tsc --module es6 --outDir lib/es/",
-    "test": "mocha --compilers ts:ts-node/register 'src/**/__tests__/*.spec.ts'",
-    "test-watch": "npm t -- -w -R min",
+    "test": "tape -r ts-node/register 'src/**/__tests__/**/*.spec.ts' | faucet",
     "coverage": "nyc npm t",
     "prepublish": "npm run lint && npm t && npm run build",
-    "precommit": "./scripts/pre-commit.sh",
-    "tape": "tape -r ts-node/register 'src/**/__tests__/*.spec.ts' | faucet"
+    "precommit": "./scripts/pre-commit.sh"
   },
   "dependencies": {
     "global": "^4.3.1"
