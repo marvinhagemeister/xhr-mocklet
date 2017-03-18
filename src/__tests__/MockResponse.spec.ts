@@ -7,7 +7,7 @@ test("should get/set body", t => {
   res.body("foo");
   t.equal(res.body(), "foo");
 
-  res.body({  foo: "bar" });
+  res.body({ foo: "bar" });
   t.equal(res.body(), "{\"foo\":\"bar\"}");
   t.end();
 });
@@ -38,7 +38,7 @@ test("should get/set all http headers at once", t => {
   const res = new MockResponse();
 
   res.headers({ foo: "bar" });
-  t.deepEqual(res.headers(), {  foo: "bar" });
+  t.deepEqual(res.headers(), { foo: "bar" });
   t.end();
 });
 

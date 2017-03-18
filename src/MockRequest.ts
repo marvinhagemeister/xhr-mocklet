@@ -21,10 +21,11 @@ export function createRequest(): RequestData {
 }
 
 export function xhrToRequest(xhr: MockXMLHttpRequest): RequestData {
-  // TODO: parse from xhr
+  const headers = (xhr as any)._requestHeaders;
+  const body = (xhr as any).data;
   return {
-    body: "foo",
-    headers: {},
+    body, // TODO
+    headers,
     method: xhr.method,
     url: xhr.url,
   };

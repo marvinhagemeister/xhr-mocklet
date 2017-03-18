@@ -43,7 +43,7 @@ export default class MockResponse {
   header(name: string, value: string): MockResponse
   header(name: string, value?: string): string | undefined | MockResponse {
     if (typeof value === "undefined") {
-      return this._headers[name.toLowerCase()] || null;
+      return this._headers[name];
     }
 
     this._headers[name.toLowerCase()] = value;

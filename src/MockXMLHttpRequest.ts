@@ -321,8 +321,8 @@ export default class MockXMLHttpRequest implements XMLHttpRequest {
         this.status = response.status;
         this._responseHeaders = response.headers;
         this._responseType = "text";
-        this.response = response.body();
-        this._responseText = response.body(); // TODO: detect an object and return JSON, detect XML and return XML
+        this.response = response.body;
+        this._responseText = response.body; // TODO: detect an object and return JSON, detect XML and return XML
         this.readyState = MockXMLHttpRequest.DONE;
 
         // trigger a load event because the request was received

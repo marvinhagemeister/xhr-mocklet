@@ -4,7 +4,7 @@ import { RequestData } from "./MockRequest";
 
 export const match = (method: string, url: string | RegExp) => (req: RequestData): boolean => {
   if (req.method !== method) {
-    return;
+    return false;
   }
 
   const reqUrl = req.url;

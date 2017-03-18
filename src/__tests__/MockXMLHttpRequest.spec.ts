@@ -2,6 +2,7 @@ import * as test from "tape";
 import * as sinon from "sinon";
 import MockXMLHttpRequest from "../MockXMLHttpRequest";
 import MockProgressEvent from "../polyfill/MockProgressEvent";
+import Registry from "../Registry";
 import { HTTP_METHOD_OUTDATED, HTTP_METHODS } from "../utils";
 
 /* tslint:disable only-arrow-functions */
@@ -75,62 +76,81 @@ test("should get/set withCredentials", t => {
   t.end();
 });
 
-// test("should set a header", t => {
-//   MockXMLHttpRequest.addHandler((req, res) => {
-//     t.equal(req.header("content-type"), "application/json");
-//     t.end();
-//   });
+test("should set a header", t => {
+  const registry = new Registry();
+  registry.add((req, res) => {
+    t.equal(req.headers["Content-Type"], "application/json");
+    t.end();
+    return {};
+  });
 
-//   const xhr = new MockXMLHttpRequest();
-//   xhr.open("get", "/");
-//   xhr.setRequestHeader("Content-Type", "application/json");
-//   xhr.send();
-// });
+  const xhr = new MockXMLHttpRequest(registry);
+  xhr.open("get", "/");
+  xhr.setRequestHeader("Content-Type", "application/json");
+  xhr.send();
+});
 
-// test("should be OPENED", t => {
-//   const xhr = new MockXMLHttpRequest();
-//   xhr.open("get", "/");
-//   t.equal(xhr.readyState, xhr.OPENED);
-//   t.end();
-// });
+test("should be OPENED", t => {
+  const xhr = new MockXMLHttpRequest();
+  xhr.open("get", "/");
+  t.equal(xhr.readyState, xhr.OPENED);
+  t.end();
+});
 
-// test("should throw on outdated HTTP methods", t => {
-//   const xhr = new MockXMLHttpRequest();
-//   HTTP_METHOD_OUTDATED.forEach(method => {
-//     t.throws(() => xhr.open(method, "/"));
-//   });
-//   t.end();
-// });
+test("should throw on outdated HTTP methods", t => {
+  const xhr = new MockXMLHttpRequest();
+  HTTP_METHOD_OUTDATED.forEach(method => {
+    t.throws(() => xhr.open(method, "/"));
+  });
+  t.end();
+});
 
-// test("should throw on invalid HTTP methods", t => {
-//   const xhr = new MockXMLHttpRequest();
-//   ["foo", "BAZ"].forEach(method => {
-//     t.throws(() => xhr.open(method, "/"));
-//   });
-//   t.end();
-// });
+test("should throw on invalid HTTP methods", t => {
+  const xhr = new MockXMLHttpRequest();
+  ["foo", "BAZ"].forEach(method => {
+    t.throws(() => xhr.open(method, "/"));
+  });
+  t.end();
+});
 
-// test("should have a request body", t => {
-//   MockXMLHttpRequest.addHandler((req, res) => {
-//     t.equal(req.body(), "Hello World!");
-//     t.end();
-//   });
+test("should NOT have a request body if GET", t => {
+  const registry = new Registry();
+  registry.add((req, res) => {
+    t.equal(req.body, null);
+    t.end();
+    return {};
+  });
 
-//   const xhr = new MockXMLHttpRequest();
-//   xhr.open("get", "/");
-//   xhr.send("Hello World!");
-// });
+  const xhr = new MockXMLHttpRequest(registry);
+  xhr.open("GET", "/");
+  xhr.send("Hello World!");
+});
 
-// test("should not have a request body", t => {
-//   MockXMLHttpRequest.addHandler((req, res) => {
-//     t.equal(req.body(), null);
-//     t.end();
-//   });
+test("should NOT have a request body if HEAD", t => {
+  const registry = new Registry();
+  registry.add((req, res) => {
+    t.equal(req.body, null);
+    t.end();
+    return {};
+  });
 
-//   const xhr = new MockXMLHttpRequest();
-//   xhr.open("get", "/");
-//   xhr.send();
-// });
+  const xhr = new MockXMLHttpRequest(registry);
+  xhr.open("HEAD", "/");
+  xhr.send("Hello World!");
+});
+
+test("should have a request body", t => {
+  const registry = new Registry();
+  registry.add((req, res) => {
+    t.equal(req.body, "Hello World!");
+    t.end();
+    return {};
+  });
+
+  const xhr = new MockXMLHttpRequest(registry);
+  xhr.open("POST", "/");
+  xhr.send("Hello World!");
+});
 
 // test("should time out after 100ms", t => {
 //   MockXMLHttpRequest.addHandler((req, res) => res.timeout(true));
