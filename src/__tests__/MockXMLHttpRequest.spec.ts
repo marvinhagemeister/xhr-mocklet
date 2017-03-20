@@ -152,155 +152,158 @@ test("should have a request body", t => {
   xhr.send("Hello World!");
 });
 
-// test("should time out after 100ms", t => {
-//   MockXMLHttpRequest.addHandler((req, res) => res.timeout(true));
+test("should time out after 100ms", t => {
+  const registry = new Registry();
+  registry.add((req, res) => res.timeout(true).build());
 
-//   let start: any;
-//   let end: any;
-//   const xhr = new MockXMLHttpRequest();
-//   xhr.timeout = 100;
-//   xhr.open("get", "/");
-//   xhr.ontimeout = () => {
-//     end = Date.now();
-//     t.true(end - start >= 100);
-//     t.equal(xhr.readyState, 4);
-//     t.end();
-//   };
-//   start = Date.now();
-//   xhr.send();
-// });
+  let start: any;
+  let end: any;
+  const xhr = new MockXMLHttpRequest(registry);
+  xhr.timeout = 100;
+  xhr.open("get", "/");
+  xhr.ontimeout = () => {
+    end = Date.now();
+    t.true(end - start >= 100);
+    t.equal(xhr.readyState, 4);
+    t.end();
+  };
+  start = Date.now();
+  xhr.send();
+});
 
-// test("should time out after 100ms even though the timeout is set to timeout after 10ms", t => {
-//   MockXMLHttpRequest.addHandler((req, res) => {
-//     return res.timeout(100);
-//   });
+test("should time out after 5ms even though the timeout is set to timeout after 2ms", t => {
+  const registry = new Registry();
+  registry.add((req, res) => res.timeout(5).build());
 
-//   const xhr = new MockXMLHttpRequest();
-//   xhr.timeout = 10;
-//   xhr.open("get", "/");
+  const xhr = new MockXMLHttpRequest(registry);
+  xhr.timeout = 2;
+  xhr.open("get", "/");
 
-//   let start: any;
-//   let end: any;
-//   xhr.ontimeout = () => {
-//     end = Date.now();
-//     t.true(end - start >= 100);
-//     t.equal(xhr.readyState, xhr.DONE);
-//     t.end();
-//   };
-//   start = Date.now();
-//   xhr.send();
-// });
+  let start: any;
+  let end: any;
+  xhr.ontimeout = () => {
+    end = Date.now();
+    t.true(end - start >= 5);
+    t.equal(xhr.readyState, xhr.DONE);
+    t.end();
+  };
+  start = Date.now();
+  xhr.send();
+});
 
-// test("should not time out after 100ms when the request has been aborted", t => {
-//   let aborted = false;
-//   let timedout = false;
+test("should not time out after 10ms when the request has been aborted", t => {
+  const registry = new Registry();
+  registry.add((req, res) => res.timeout(10).build());
 
-//   MockXMLHttpRequest.addHandler((req, res) => res.timeout(10));
+  let aborted = false;
+  let timedout = false;
 
-//   const xhr = new MockXMLHttpRequest();
-//   xhr.open("get", "/");
-//   xhr.ontimeout = () => timedout = true;
-//   xhr.onabort = () => aborted = true;
-//   xhr.send();
-//   xhr.abort();
+  const xhr = new MockXMLHttpRequest(registry);
+  xhr.open("get", "/");
+  xhr.ontimeout = () => timedout = true;
+  xhr.onabort = () => aborted = true;
+  xhr.send();
+  xhr.abort();
 
-//   setTimeout(() => {
-//     t.true(aborted);
-//     t.true(!timedout);
-//     t.end();
-//   }, 10);
-// });
+  setTimeout(() => {
+    t.true(aborted);
+    t.true(!timedout);
+    t.end();
+  }, 10);
+});
 
-// test("should have a response header", t => {
-//   MockXMLHttpRequest.addHandler((req, res) => {
-//     return res.header("Content-Type", "application/json");
-//   });
+test("should have a response header", t => {
+  const registry = new Registry();
+  registry.add((req, res) =>
+    res.header("Content-Type", "application/json").build());
 
-//   const xhr = new MockXMLHttpRequest();
-//   xhr.open("get", "/");
-//   xhr.onload = () => {
-//     t.equal(xhr.getResponseHeader("Content-Type"), "application/json");
-//     t.end();
-//   };
-//   xhr.send();
-// });
+  const xhr = new MockXMLHttpRequest(registry);
+  xhr.open("get", "/");
+  xhr.onload = () => {
+    t.equal(xhr.getResponseHeader("Content-Type"), "application/json");
+    t.end();
+  };
+  xhr.send();
+});
 
-// test("should have a response header", t => {
-//   MockXMLHttpRequest.addHandler((req, res) => {
-//     return res
-//       .header("Content-Type", "application/json")
-//       .header("X-Powered-By", "SecretSauce");
-//   });
+test("should have a response header", t => {
+  const registry = new Registry();
+  registry.add((req, res) =>
+    res
+      .header("Content-Type", "application/json")
+      .header("X-Powered-By", "SecretSauce")
+      .build());
 
-//   const xhr = new MockXMLHttpRequest();
-//   xhr.open("get", "/");
-//   xhr.onload = () => {
-//     t.equal(xhr.getAllResponseHeaders(), "content-type: application/json\r\nx-powered-by: SecretSauce\r\n");
-//     t.end();
-//   };
-//   xhr.send();
-// });
+  const xhr = new MockXMLHttpRequest(registry);
+  xhr.open("get", "/");
+  xhr.onload = () => {
+    t.equal(xhr.getAllResponseHeaders(), "content-type: application/json\r\nx-powered-by: SecretSauce\r\n");
+    t.end();
+  };
+  xhr.send();
+});
 
-// test("should allow registering load event listener", t => {
-//   MockXMLHttpRequest.addHandler((req, res) => res);
+test("should allow registering load event listener", t => {
+  const registry = new Registry();
+  registry.add((req, res) => res.build());
 
-//   const xhr = new MockXMLHttpRequest();
-//   xhr.addEventListener("load", function(event) {
-//     t.equal(event.currentTarget, xhr);
-//     t.equal(event.type, "load");
-//     t.equal(this, xhr);
-//     t.end();
-//   });
-//   xhr.open("get", "/");
-//   xhr.send();
-// });
+  const xhr = new MockXMLHttpRequest(registry);
+  xhr.addEventListener("load", function(event) {
+    t.equal(event.currentTarget, xhr);
+    t.equal(event.type, "load");
+    t.equal(this, xhr);
+    t.end();
+  });
+  xhr.open("get", "/");
+  xhr.send();
+});
 
-// test("should allow registering abort event listener", t => {
-//   MockXMLHttpRequest.addHandler((req, res) => res);
+test("should allow registering abort event listener", t => {
+  const registry = new Registry();
+  registry.add((req, res) => res.build());
 
-//   const xhr = new MockXMLHttpRequest();
-//   xhr.addEventListener("abort", function(event) {
-//     t.equal(event.currentTarget, xhr);
-//     t.equal(this, xhr);
-//     t.end();
-//   });
-//   xhr.open("get", "/");
-//   xhr.send();
-//   xhr.abort();
-// });
+  const xhr = new MockXMLHttpRequest(registry);
+  xhr.addEventListener("abort", function(event) {
+    t.equal(event.currentTarget, xhr);
+    t.equal(this, xhr);
+    t.end();
+  });
+  xhr.open("get", "/");
+  xhr.send();
+  xhr.abort();
+});
 
-// test("should allow registering progress event listener", t => {
-//   MockXMLHttpRequest.addHandler((req, res) => {
-//     req.progress(50, 100);
-//     return res;
-//   });
+test("should allow registering progress event listener", t => {
+  const registry = new Registry();
+  registry.add((req, res) => res.progress(50, 100).build());
 
-//   const xhr = new MockXMLHttpRequest();
-//   xhr.addEventListener("progress", event => {
-//     t.equal(event instanceof MockProgressEvent, true);
-//     t.equal(event.type, "progress");
-//     t.equal(event.lengthComputable, true);
-//     t.equal(event.loaded, 50);
-//     t.equal(event.total, 100);
-//     t.end();
-//   });
-//   xhr.open("get", "/");
-//   xhr.send();
-// });
+  const xhr = new MockXMLHttpRequest();
+  xhr.addEventListener("progress", event => {
+    t.equal(event instanceof MockProgressEvent, true);
+    t.equal(event.type, "progress");
+    t.equal(event.lengthComputable, true);
+    t.equal(event.loaded, 50);
+    t.equal(event.total, 100);
+    t.end();
+  });
+  xhr.open("get", "/");
+  xhr.send();
+});
 
-// test("should allow unregistering event listener", t => {
-//   MockXMLHttpRequest.addHandler((req, res) => res);
-//   const spy = sinon.spy();
+test("should allow unregistering event listener", t => {
+  const registry = new Registry();
+  registry.add((req, res) => res.build());
 
-//   const xhr = new MockXMLHttpRequest();
+  const spy = sinon.spy();
+  const xhr = new MockXMLHttpRequest(registry);
 
-//   xhr.addEventListener("load", spy);
-//   xhr.removeEventListener("load", spy);
-//   xhr.open("get", "/");
-//   xhr.send();
+  xhr.addEventListener("load", spy);
+  xhr.removeEventListener("load", spy);
+  xhr.open("get", "/");
+  xhr.send();
 
-//   setTimeout(() => {
-//     t.equal(spy.callCount, 0);
-//     t.end();
-//   }, 5);
-// });
+  setTimeout(() => {
+    t.equal(spy.callCount, 0);
+    t.end();
+  }, 5);
+});

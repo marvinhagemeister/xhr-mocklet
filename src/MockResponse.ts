@@ -96,13 +96,14 @@ export default class MockResponse {
   }
 
   /** Trigger progress event */
-  progress(loaded: number, total?: number, lengthComputable: boolean = true): void {
+  progress(loaded: number, total?: number, lengthComputable: boolean = true): MockResponse {
     // this._progress()
     // this._xhr.trigger("progress", new MockProgressEvent("progress", {
     //   lengthComputable: lengthComputable || true,
     //   loaded,
     //   total,
     // }));
+    return this;
   }
 
   build(): IMockResponseData {
