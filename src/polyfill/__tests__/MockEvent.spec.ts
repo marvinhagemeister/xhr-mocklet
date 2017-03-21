@@ -1,38 +1,35 @@
-import * as test from "tape";
+import {  assert as t } from "chai";
 import MockEvent from "../MockEvent";
 
-test("should initialize constructor args", t => {
-  const ev = new MockEvent("foo", { bubbles: false });
-  t.equal(ev.type, "foo");
-  t.equal(ev.bubbles, false);
-  t.end();
-});
+describe("MockEvent", () => {
+  it("should initialize constructor args", () => {
+    const ev = new MockEvent("foo", { bubbles: false });
+    t.equal(ev.type, "foo");
+    t.equal(ev.bubbles, false);
+  });
 
-test("should initEvent", t => {
-  const ev = new MockEvent("foo");
-  ev.initEvent("nope", true, true);
-  t.equal(ev.type, "nope");
-  t.equal(ev.bubbles, true);
-  t.equal(ev.cancelable, true);
-  t.end();
-});
+  it("should initEvent", () => {
+    const ev = new MockEvent("foo");
+    ev.initEvent("nope", true, true);
+    t.equal(ev.type, "nope");
+    t.equal(ev.bubbles, true);
+    t.equal(ev.cancelable, true);
+  });
 
-test("should preventDefault", t => {
-  const ev = new MockEvent("foo");
-  ev.preventDefault();
-  t.equal(ev.defaultPrevented, true);
-  t.end();
-});
+  it("should preventDefault", () => {
+    const ev = new MockEvent("foo");
+    ev.preventDefault();
+    t.equal(ev.defaultPrevented, true);
+  });
 
-test("should deepPath", t => {
-  const ev = new MockEvent("foo");
-  t.deepEqual(ev.deepPath(), []);
-  t.end();
-});
+  it("should deepPath", () => {
+    const ev = new MockEvent("foo");
+    t.deepEqual(ev.deepPath(), []);
+  });
 
-test("should do nothing on not implemented methods", t => {
-  const ev = new MockEvent("foo");
-  ev.stopImmediatePropagation();
-  ev.stopPropagation();
-  t.end();
+  it("should do nothing on not implemented methods", () => {
+    const ev = new MockEvent("foo");
+    ev.stopImmediatePropagation();
+    ev.stopPropagation();
+  });
 });

@@ -1,11 +1,11 @@
-import * as test from "tape";
+import { assert as t } from "chai";
 import * as index from "../index";
 
-test("should export all modules", t => {
+it("should export all modules", done => {
   t.deepEqual(Object.keys(index), [
     "MockXMLHttpRequest",
     "MockResponse",
     "default",
   ]);
-  t.end();
+  done();
 });
