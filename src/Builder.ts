@@ -64,7 +64,7 @@ export class Builder {
   /** Mock a PUT request */
   put(url: string | RegExp, fn: RequestHandler | string | number | object): Builder {
     return this.mock("PUT", url, fn);
-  }
+}
 
   /** Mock a PATCH request */
   patch(url: string | RegExp, fn: RequestHandler | string | number | object): Builder {

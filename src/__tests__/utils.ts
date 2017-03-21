@@ -1,8 +1,10 @@
+import { Test } from "tape";
+import mock from "../Builder";
 
-const mocked = (description: string, fn: (t: test.Test) => void) => {
-  test(description, t => {
-    mock.setup();
+export const m = (fn: (t: Test) => void | Promise<any>) =>
+  (t: Test) => {
+    mock.setup(global);
     fn(t);
     mock.teardown();
-  });
-};
+    return t;
+  };

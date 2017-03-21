@@ -295,7 +295,7 @@ export default class MockXMLHttpRequest implements XMLHttpRequest {
     this.readyState = MockXMLHttpRequest.LOADING;
     this.data = body;
 
-    setTimeout(() => {
+    this._sendTimeout = setTimeout(() => {
       this.trigger("loadstart", {
         loaded: 0,
         total: 0,
