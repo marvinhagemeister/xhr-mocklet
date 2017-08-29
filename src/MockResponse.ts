@@ -28,7 +28,7 @@ export default class MockResponse {
   /** Get a HTTP header */
   header(name: string): string | undefined;
   /** Set a HTTP header */
-  header(name: string, value: string): MockResponse
+  header(name: string, value: string): MockResponse;
   header(name: string, value?: string): string | undefined | MockResponse {
     if (typeof value === "undefined") {
       return this._headers[name.toLowerCase()] || null;
