@@ -32,6 +32,8 @@
     "precommit": "./scripts/pre-commit.sh"
   },
   "dependencies": {
+    "@types/event-emitter": "^0.3.0",
+    "event-emitter": "^0.3.5",
     "global": "^4.3.1"
   },
   "devDependencies": {
@@ -45,9 +47,9 @@
     "nyc": "^10.1.2",
     "rimraf": "^2.6.1",
     "sinon": "^1.17.7",
-    "ts-node": "^2.1.0",
-    "tslint": "^4.5.1",
-    "typescript": "^2.2.1"
+    "ts-node": "^3.3.0",
+    "tslint": "^5.7.0",
+    "typescript": "^2.4.2"
   },
   "nyc": {
     "include": [

@@ -5,6 +5,7 @@ describe("index", () => {
   it("should export all modules", () => {
     t.deepEqual(Object.keys(index), [
       "MockXMLHttpRequest",
+      "MockXMLHttpRequestUpload",
       "MockResponse",
       "MockRequest",
       "default",

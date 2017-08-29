@@ -2,8 +2,14 @@ import MockResponse from "./MockResponse";
 import MockRequest from "./MockRequest";
 import MockProgressEvent from "./polyfill/MockProgressEvent";
 import MockEvent from "./polyfill/MockEvent";
+import MockXMLHttpRequestUpload from "./MockXMLHttpRequestUpload";
 
 /* tslint:disable ban-types */
+
+interface ListenerObj {
+  type: string;
+  listener: Function;
+}
 
 const notImplementedError = new Error(
   "This feature hasn't been implmented yet. Please submit an Issue or Pull Request on Github.",
@@ -42,7 +48,7 @@ export default class MockXMLHttpRequest implements XMLHttpRequest {
   /** Add a request handler */
   static addHandler(fn: (req: MockRequest, res: MockResponse) => any): void {
     MockXMLHttpRequest.handlers.push(fn);
-  };
+  }
 
   /** Remove a request handler */
   static removeHandler(fn: (req: MockRequest, res: MockRequest) => any): MockXMLHttpRequest {
@@ -92,7 +98,7 @@ export default class MockXMLHttpRequest implements XMLHttpRequest {
   public async: boolean;
   public reponse: string;
   public responseText: string;
-  public responseType: string;
+  public responseType: XMLHttpRequestResponseType;
   public responseXML: Document;
   public responseURL: string;
   public response: string;
@@ -111,13 +117,14 @@ export default class MockXMLHttpRequest implements XMLHttpRequest {
   public onprogress: (this: XMLHttpRequestEventTarget, ev: ProgressEvent) => any;
   public ontimeout: (this: XMLHttpRequestEventTarget, ev: ProgressEvent) => any;
 
-  private _events: any[] = [];
+  private _events: ListenerObj[] = [];
   private _sendTimeout: any;
   private _requestHeaders: any;
   private _responseHeaders: any;
 
   constructor() {
     this.reset();
+    this.upload = new MockXMLHttpRequestUpload();
   }
 
   dispatchEvent(evt: Event): boolean {
