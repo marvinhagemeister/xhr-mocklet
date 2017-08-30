@@ -81,11 +81,11 @@ xhr.onreadystatechange = () => {
 | `setup()` | Replace the global `XMLHttpRequest` object with the `MockXMLHttpRequest`. |
 | `teardown()` | Restore the global `XMLHttpRequest` object to its original state. |
 | `reset()` | Remove all request handlers. |
-| `get(url: string | regex, callback)` | Create `GET` mock response for a specific url. |
-| `post(url: string | regex, callback)` | Create `POST` mock response for a specific url. |
-| `put(url: string | regex, callback)` | Create `PUT` mock response for a specific url. |
-| `patch(url: string | regex, callback)` | Create `PATCH` mock response for a specific url. |
-| `delete(url: string | regex, callback)` | Create `DELETE` mock response for a specific url. |
+| `get(url: string \| regex, callback)` | Create `GET` mock response for a specific url. |
+| `post(url: string \| regex, callback)` | Create `POST` mock response for a specific url. |
+| `put(url: string \| regex, callback)` | Create `PUT` mock response for a specific url. |
+| `patch(url: string \| regex, callback)` | Create `PATCH` mock response for a specific url. |
+| `delete(url: string \| regex, callback)` | Create `DELETE` mock response for a specific url. |
 | `mock(callback)` | Register mock response for every request. |
 
 ### MockXMLHttpRequest
@@ -115,8 +115,8 @@ The api is practically similar to the native [XMLHttpRequest](https://developer.
 | `headers(headers: obejct)` | Set response headers. |
 | `body(): string` | Get response body. |
 | `body(body: string)` | Set response body. |
-| `timeout(): boolean | number` | Get weather the response will trigger a timeout. |
-| `timeout(ms: boolean | number)` | Set a timeout, otherwise default to the value set on the XHR object. |
+| `timeout(): boolean \| number` | Get weather the response will trigger a timeout. |
+| `timeout(ms: boolean \| number)` | Set a timeout, otherwise default to the value set on the XHR object. |
 | `progress(loaded: number, total: number, lengthComputable: boolean)` | Trigger progress event. Pass in loaded size, total size and if event is lengthComputable. |
 
 ## Special Thanks
