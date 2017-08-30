@@ -1,3 +1,4 @@
+import { MockCallback } from "./Builder";
 import MockResponse from "./MockResponse";
 import MockRequest from "./MockRequest";
 import MockProgressEvent from "./polyfill/MockProgressEvent";
@@ -43,15 +44,15 @@ export default class MockXMLHttpRequest implements XMLHttpRequest {
   public static readonly LOADING = 3;
   public static readonly DONE = 4;
 
-  public static handlers: any[] = [];
+  public static handlers: MockCallback[] = [];
 
   /** Add a request handler */
-  static addHandler(fn: (req: MockRequest, res: MockResponse) => any): void {
+  static addHandler(fn: MockCallback): void {
     MockXMLHttpRequest.handlers.push(fn);
   }
 
   /** Remove a request handler */
-  static removeHandler(fn: (req: MockRequest, res: MockRequest) => any): MockXMLHttpRequest {
+  static removeHandler(fn: MockCallback): MockXMLHttpRequest {
     throw notImplementedError;
   }
 

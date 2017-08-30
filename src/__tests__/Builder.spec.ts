@@ -1,10 +1,10 @@
 import { assert as t } from "chai";
 import * as sinon from "sinon";
 import * as window from "global";
-import mock from "../Builder";
+import mock, { MockCallback } from "../Builder";
 import MockProgressEvent from "../polyfill/MockProgressEvent";
 
-const noop = (res: any) => res;
+const noop: MockCallback  = (req, res) => res;
 
 describe("Builder", () => {
   it("should setup and teardown the mock XMLHttpRequest class", () => {

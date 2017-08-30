@@ -81,11 +81,11 @@ xhr.onreadystatechange = () => {
 | `setup()` | Replace the global `XMLHttpRequest` object with the `MockXMLHttpRequest`. |
 | `teardown()` | Restore the global `XMLHttpRequest` object to its original state. |
 | `reset()` | Remove all request handlers. |
-| `get(url: string | regex, callback)` | Create `GET` mock response for a specific url. |
-| `post(url: string | regex, callback)` | Create `POST` mock response for a specific url. |
-| `put(url: string | regex, callback)` | Create `PUT` mock response for a specific url. |
-| `patch(url: string | regex, callback)` | Create `PATCH` mock response for a specific url. |
-| `delete(url: string | regex, callback)` | Create `DELETE` mock response for a specific url. |
+| `get(url: string &#124; regex, callback)` | Create `GET` mock response for a specific url. |
+| `post(url: string &#124; regex, callback)` | Create `POST` mock response for a specific url. |
+| `put(url: string &#124; regex, callback)` | Create `PUT` mock response for a specific url. |
+| `patch(url: string &#124; regex, callback)` | Create `PATCH` mock response for a specific url. |
+| `delete(url: string &#124; regex, callback)` | Create `DELETE` mock response for a specific url. |
 | `mock(callback)` | Register mock response for every request. |
 
 ### MockXMLHttpRequest
