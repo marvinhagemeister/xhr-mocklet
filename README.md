@@ -115,8 +115,8 @@ The api is practically similar to the native [XMLHttpRequest](https://developer.
 | `headers(headers: obejct)` | Set response headers. |
 | `body(): string` | Get response body. |
 | `body(body: string)` | Set response body. |
-| `timeout(): boolean | number` | Get weather the response will trigger a timeout. |
-| `timeout(ms: boolean | number)` | Set a timeout, otherwise default to the value set on the XHR object. |
+| `timeout(): boolean &#124; number` | Get weather the response will trigger a timeout. |
+| `timeout(ms: boolean &#124; number)` | Set a timeout, otherwise default to the value set on the XHR object. |
 | `progress(loaded: number, total: number, lengthComputable: boolean)` | Trigger progress event. Pass in loaded size, total size and if event is lengthComputable. |
 
 ## Special Thanks
