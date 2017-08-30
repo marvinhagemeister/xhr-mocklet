@@ -15,11 +15,25 @@ describe("MockXMLHttpRequest", () => {
       MockXMLHttpRequest.addHandler((req, res) => {
         t.equal(req.header("content-type"), "application/json");
         done();
+        return res;
       });
 
       const xhr = new MockXMLHttpRequest();
       xhr.open("/");
       xhr.setRequestHeader("Content-Type", "application/json");
+      xhr.send();
+    });
+
+    it("should error if we return null", done => {
+      MockXMLHttpRequest.addHandler(() => null);
+
+      const xhr = new MockXMLHttpRequest();
+      xhr.onerror = (ev) => {
+        t.isTrue(ev instanceof MockProgressEvent);
+        t.equal(ev.type, "error");
+        done();
+      };
+      xhr.open("/");
       xhr.send();
     });
   });
@@ -37,6 +51,7 @@ describe("MockXMLHttpRequest", () => {
       MockXMLHttpRequest.addHandler((req, res) => {
         t.equal(req.body(), "Hello World!");
         done();
+        return res;
       });
 
       const xhr = new MockXMLHttpRequest();
@@ -48,6 +63,7 @@ describe("MockXMLHttpRequest", () => {
       MockXMLHttpRequest.addHandler((req, res) => {
         t.equal(req.body(), null);
         done();
+        return res;
       });
 
       const xhr = new MockXMLHttpRequest();

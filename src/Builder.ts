@@ -5,13 +5,14 @@ import * as window from "global";
 
 const real = (window as any).XMLHttpRequest;
 
-export type MockCallback = (req?: MockRequest, res?: MockResponse) => MockResponse;
+export type UrlMatcher = string | RegExp;
+export type MockCallback = (req?: MockRequest, res?: MockResponse) => MockResponse | null;
 
 export class Builder {
   XMLHttpRequest = new MockXMLHttpRequest();
 
   /** Replace the native XHR with the mocked XHR */
-  setup(): Builder {
+  setup() {
     (window as any).XMLHttpRequest = MockXMLHttpRequest;
     return this.reset();
   }
@@ -23,16 +24,16 @@ export class Builder {
   }
 
   /** Remove any handlers */
-  reset(): Builder {
+  reset() {
     MockXMLHttpRequest.reset();
     return this;
   }
 
   /** Mock a requests */
-  mock(fn: (req?: MockRequest, res?: MockResponse) => MockResponse): Builder;
-  mock(method: string, url?: string | RegExp, fn?: MockCallback): Builder;
-  mock(method: string | MockCallback, url?: string | RegExp, fn?: MockCallback): Builder {
-    let handler: any;
+  mock(fn: MockCallback): this;
+  mock(method: string, url: UrlMatcher, fn: MockCallback): this;
+  mock(method: string | MockCallback, url?: UrlMatcher, fn?: MockCallback): this {
+    let handler: MockCallback;
 
     if (typeof url !== "undefined") {
       const matcher = (req: MockRequest) => {
@@ -48,14 +49,16 @@ export class Builder {
         // otherwise assume the url is a string
         return url === reqUrl;
       };
-      handler = (req: MockRequest, res: MockResponse) => {
+      handler = (req, res) => {
         if (matcher(req)) {
           return fn(req, res);
         }
-        return false;
+        return res;
       };
-    } else {
+    } else if (typeof method === "function") {
       handler = method;
+    } else {
+      handler = (req, res) => res;
     }
 
     MockXMLHttpRequest.addHandler(handler);
@@ -64,27 +67,27 @@ export class Builder {
   }
 
   /** Mock a GET request */
-  get(url: string | RegExp, fn: (req?: MockRequest, res?: MockResponse) => MockResponse): Builder {
+  get(url: UrlMatcher, fn: MockCallback) {
     return this.mock("GET", url, fn);
   }
 
   /** Mock a POST request */
-  post(url: string | RegExp, fn: (req?: MockRequest, res?: MockResponse) => MockResponse): Builder {
+  post(url: UrlMatcher, fn: MockCallback) {
     return this.mock("POST", url, fn);
   }
 
   /** Mock a PUT request */
-  put(url: string | RegExp, fn: (req?: MockRequest, res?: MockResponse) => MockResponse): Builder {
+  put(url: UrlMatcher, fn: MockCallback) {
     return this.mock("PUT", url, fn);
   }
 
   /** Mock a PATCH request */
-  patch(url: string | RegExp, fn: (req?: MockRequest, res?: MockResponse) => MockResponse): Builder {
+  patch(url: UrlMatcher, fn: MockCallback) {
     return this.mock("PATCH", url, fn);
   }
 
   /** Mock a DELETE request */
-  delete(url: string | RegExp, fn: (req?: MockRequest, res?: MockResponse) => MockResponse): Builder {
+  delete(url: UrlMatcher, fn: MockCallback) {
     return this.mock("DELETE", url, fn);
   }
 }
