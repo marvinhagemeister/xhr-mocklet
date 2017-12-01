@@ -53,7 +53,7 @@ export class Builder {
         if (matcher(req)) {
           return fn(req, res);
         }
-        return res;
+        return null;
       };
     } else if (typeof method === "function") {
       handler = method;
