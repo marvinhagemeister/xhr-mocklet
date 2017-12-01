@@ -88,6 +88,35 @@ describe("Builder", () => {
       xhr.send();
     });
 
+    it("should resolve correct responses", done => {
+      mock.mock("GET", "/a", (req, res) => {
+        return res
+          .status(200)
+          .body("A");
+      });
+
+      mock.mock("GET", "/b", (req, res) => {
+        return res
+          .status(200)
+          .body("B");
+      });
+
+      const xhr = new XMLHttpRequest();
+      xhr.open("GET", "/a");
+      xhr.onload = () => {
+        t.equal(xhr.responseText, "A");
+        done();
+      };
+
+      const xhr2 = new XMLHttpRequest();
+      xhr2.open("GET", "/b");
+      xhr2.onload = () => {
+        xhr.send();
+        t.equal(xhr2.responseText, "B");
+      };
+      xhr2.send();
+    });
+
     it("should support POST method", done => {
       mock.post("/foo/123", (req, res) => res.body("123"));
 
