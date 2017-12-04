@@ -88,7 +88,7 @@ describe("Builder", () => {
       xhr.send();
     });
 
-    it("should resolve correct responses", done => {
+    it("should resolve correct responses", () => {
       mock.mock("GET", "/a", (req, res) => {
         return res
           .status(200)
@@ -101,20 +101,27 @@ describe("Builder", () => {
           .body("B");
       });
 
-      const xhr = new XMLHttpRequest();
-      xhr.open("GET", "/a");
-      xhr.onload = () => {
-        t.equal(xhr.responseText, "A");
-        done();
-      };
-
-      const xhr2 = new XMLHttpRequest();
-      xhr2.open("GET", "/b");
-      xhr2.onload = () => {
+      const promise1 = new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open("GET", "/a");
+        xhr.onload = () => {
+          t.equal(xhr.responseText, "A");
+          resolve();
+        };
         xhr.send();
-        t.equal(xhr2.responseText, "B");
-      };
-      xhr2.send();
+      });
+
+      const promise2 = new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open("GET", "/b");
+        xhr.onload = () => {
+          t.equal(xhr.responseText, "B");
+          resolve();
+        };
+        xhr.send();
+      });
+
+      return Promise.all([promise1, promise2]);
     });
 
     it("should support POST method", done => {
