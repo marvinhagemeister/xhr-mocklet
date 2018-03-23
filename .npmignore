@@ -1,5 +1,6 @@
 node_modules/
 .nyc_output/
+.vscode/
 coverage/
 scripts/
 src/
@@ -7,5 +8,6 @@ src/
 .npmignore
 .travis.yml
 .gitignore
-tsconfig.json
+tsconfig.*
 tslint.json
+*.log
