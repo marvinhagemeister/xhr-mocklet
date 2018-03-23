@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.2
+
+- Trim down npm package to only include what's actually needed
+
 ## 1.2.1
 
 - Clean up types and allow erroring the response similar to `xhr-mock`. Brought to you by [@joscha](https://github.com/joscha)
