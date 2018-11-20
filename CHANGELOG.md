@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.3
+
+- Fix timeout handling #21, thanks @hearnden!
+
 ## 1.2.2
 
 - Trim down npm package to only include what's actually needed
