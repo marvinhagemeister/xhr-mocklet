@@ -214,7 +214,9 @@ export default class MockXMLHttpRequest implements XMLHttpRequest {
       const response = MockXMLHttpRequest.handle(new MockRequest(this));
 
       if (response !== null) {
-        const timeout = Math.max(response.timeout(), this.timeout);
+        const timeout = response.timeout() && this.timeout
+            ? Math.min(response.timeout(), this.timeout)
+            : response.timeout();
 
         if (timeout > 0) {
           // trigger a timeout event because the request timed timeout
