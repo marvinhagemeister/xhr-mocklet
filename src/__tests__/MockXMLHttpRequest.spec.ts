@@ -71,7 +71,7 @@ describe("MockXMLHttpRequest", () => {
       xhr.send();
     });
 
-    it("should time out after 100ms", done => {
+    it("should time out after the response timeout (1ms) when it is lower than the request timeout (10ms)", done => {
       MockXMLHttpRequest.addHandler((req, res) => res.timeout(true));
 
       let start: any;
@@ -81,7 +81,7 @@ describe("MockXMLHttpRequest", () => {
       xhr.open("/");
       xhr.ontimeout = () => {
         end = Date.now();
-        t.isTrue(end - start >= 100);
+        t.isTrue(end - start >= 1);
         t.equal(xhr.readyState, 4);
         done();
       };
@@ -89,7 +89,7 @@ describe("MockXMLHttpRequest", () => {
       xhr.send();
     });
 
-    it("should time out after 100ms even though the timeout is set to timeout after 10ms", done => {
+    it("should time out after the request timeout (10ms) when it is lower than the response timeout (100ms)", done => {
       MockXMLHttpRequest.addHandler((req, res) => {
         return res.timeout(100);
       });
@@ -102,7 +102,7 @@ describe("MockXMLHttpRequest", () => {
       let end: any;
       xhr.ontimeout = () => {
         end = Date.now();
-        t.isTrue(end - start >= 100);
+        t.isTrue(end - start >= 10);
         t.equal(xhr.readyState, xhr.DONE);
         done();
       };
